@@ -148,6 +148,7 @@ C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.AP
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.csproj.CoreCompileInputs.cache
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.sourcelink.json
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\scopedcss\bundle\ExtraHours.API.styles.css
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\staticwebassets.development.json

@@ -36,8 +36,7 @@ namespace ExtraHours.API.Data
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<ExtraHour>().Property(eh => eh.TotalHours).HasColumnType("decimal(5,2)");
-            modelBuilder.Entity<ExtraHour>().Property(eh => eh.ExtraHoursCount).HasColumnType("decimal(5,2)");
+            // modelBuilder.Entity<ExtraHour>().Property(eh => eh.TotalHours).HasColumnType("decimal(5,2)");
 
             base.OnModelCreating(modelBuilder);
         }
