@@ -12,7 +12,7 @@ public class ExtraHour
     [Required]
     public int UserId { get; set; }
 
-    public User User { get; set; } = null!;
+    public User? User { get; set; } = null!;
 
     [Required]
     public DateTime Date { get; set; }

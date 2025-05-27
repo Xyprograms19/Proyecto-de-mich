@@ -10,7 +10,7 @@ namespace ExtraHours.API.Data
         public DbSet<ExtraHour> ExtraHours { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Department> Departments { get; set; }
-
+        public DbSet<ExtraHourRequest> ExtraHourRequests { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -1,4 +1,4 @@
-// Controllers/ExtraHoursController.cs
+
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -76,15 +76,19 @@ namespace YourProjectName.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ExtraHour>> PostExtraHour(ExtraHour extraHour)
+        public async Task<ActionResult<ExtraHour>> PostExtraHour([FromBody] ExtraHour extraHour)
         {
-            extraHour.Id = _nextId++;
             extraHour.RequestedAt = DateTime.Now;
-            if (extraHour.Status == null) extraHour.Status = "Pendiente";
 
-            _extraHours.Add(extraHour);
+            if (extraHour.Status == null)
+                extraHour.Status = "Pendiente";
+
+            _context.ExtraHours.Add(extraHour);
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetExtraHour), new { id = extraHour.Id }, extraHour);
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExtraHour(int id, ExtraHour extraHour)
@@ -112,7 +116,7 @@ namespace YourProjectName.Controllers
                 if (extraHour.Status == "Aprobada" || extraHour.Status == "Rechazada")
                 {
                     existingExtraHour.ApprovedRejectedAt = DateTime.Now;
-                    existingExtraHour.ApprovedRejectedByUserId = 999; // Simulado
+                    existingExtraHour.ApprovedRejectedByUserId = 999;
                 }
                 else
                 {
@@ -138,3 +142,6 @@ namespace YourProjectName.Controllers
         }
     }
 }
+
+
+

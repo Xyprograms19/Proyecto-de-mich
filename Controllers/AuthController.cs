@@ -51,7 +51,7 @@ namespace ExtraHours.API.Controllers
                 PasswordHash = passwordHash,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Role = UserRole.Employee,
+                Role = UserRole.Admin,
                 Department = "General",
                 Position = "N/A",
                 IsActive = true,

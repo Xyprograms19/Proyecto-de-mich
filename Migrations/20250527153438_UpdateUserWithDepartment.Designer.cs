@@ -3,6 +3,7 @@ using System;
 using ExtraHours.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExtraHours.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250527153438_UpdateUserWithDepartment")]
+    partial class UpdateUserWithDepartment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,60 +92,6 @@ namespace ExtraHours.API.Migrations
                     b.ToTable("ExtraHours");
                 });
 
-            modelBuilder.Entity("ExtraHours.API.Models.ExtraHourRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("AdminComments")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime?>("ApprovedRejectedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("ApprovedRejectedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateOfExtraHours")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("ExtraHourTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime>("RequestDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApprovedRejectedByUserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ExtraHourRequests");
-                });
-
             modelBuilder.Entity("ExtraHours.API.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -216,23 +165,6 @@ namespace ExtraHours.API.Migrations
                         .WithMany("RegisteredExtraHours")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ApprovedRejectedByUser");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ExtraHours.API.Models.ExtraHourRequest", b =>
-                {
-                    b.HasOne("ExtraHours.API.Models.User", "ApprovedRejectedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedRejectedByUserId");
-
-                    b.HasOne("ExtraHours.API.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ApprovedRejectedByUser");
