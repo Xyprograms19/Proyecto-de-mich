@@ -19,50 +19,70 @@ namespace ExtraHours.API.Migrations
                 .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("ExtraHours.API.Models.ExtraHour", b =>
+            modelBuilder.Entity("Department", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("ApprovedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("ApprovedById")
+                    b.Property<int>("Employees")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("ExtraHour", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ApprovedRejectedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("ApprovedRejectedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Description")
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time(6)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("longtext");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("RequestedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time(6)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApprovedById");
+                    b.HasIndex("ApprovedRejectedByUserId");
 
                     b.HasIndex("UserId");
 
@@ -115,9 +135,8 @@ namespace ExtraHours.API.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -129,20 +148,14 @@ namespace ExtraHours.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ExtraHours.API.Models.ExtraHour", b =>
+            modelBuilder.Entity("ExtraHour", b =>
                 {
-                    b.HasOne("ExtraHours.API.Models.User", "ApprovedBy")
+                    b.HasOne("ExtraHours.API.Models.User", "ApprovedRejectedByUser")
                         .WithMany("ApprovedExtraHours")
-                        .HasForeignKey("ApprovedById")
+                        .HasForeignKey("ApprovedRejectedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ExtraHours.API.Models.User", "User")
@@ -151,7 +164,7 @@ namespace ExtraHours.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ApprovedBy");
+                    b.Navigation("ApprovedRejectedByUser");
 
                     b.Navigation("User");
                 });

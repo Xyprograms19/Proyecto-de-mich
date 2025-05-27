@@ -12,6 +12,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using System;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ExtraHours.API.Controllers
 {
@@ -65,8 +66,9 @@ namespace ExtraHours.API.Controllers
             return CreatedAtAction(nameof(Register), user);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -76,23 +78,18 @@ namespace ExtraHours.API.Controllers
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == request.UsernameOrEmail || u.Email == request.UsernameOrEmail);
 
-            if (user == null)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
-                return Unauthorized("Credenciales inválidas.");
+                return Unauthorized(new { message = "Credenciales inválidas." });
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            {
-                return Unauthorized("Credenciales inválidas.");
-            }
+            TimeSpan expiryDuration = request.RememberMe ?
+                                       TimeSpan.FromDays(7) :
+                                       TimeSpan.FromHours(1);
 
-            var token = GenerateJwtToken(user);
-            return Ok(token);
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var claims = new[]
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
@@ -100,27 +97,30 @@ namespace ExtraHours.API.Controllers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var jwtSecret = _configuration["Jwt:Key"];
-            if (string.IsNullOrEmpty(jwtSecret))
-            {
-                throw new InvalidOperationException("JWT Key no configurada en appsettings.json.");
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
-                SigningCredentials = creds,
+                Expires = DateTime.UtcNow.Add(expiryDuration),
                 Issuer = _configuration["Jwt:Issuer"],
-                Audience = _configuration["Jwt:Audience"]
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return Ok(new
+            {
+                token = tokenString,
+                role = user.Role.ToString(),
+                userId = user.Id,
+                username = user.Username,
+                email = user.Email,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                department = user.Department,
+                position = user.Position,
+            });
         }
     }
 }

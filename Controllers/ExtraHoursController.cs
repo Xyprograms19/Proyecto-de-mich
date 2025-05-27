@@ -1,95 +1,89 @@
+// Controllers/ExtraHoursController.cs
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ExtraHours.API.Data;
-using ExtraHours.API.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using System;
+using ExtraHours.API.Models;
 
-namespace ExtraHours.API.Controllers
+namespace YourProjectName.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [ApiController]
     public class ExtraHoursController : ControllerBase
     {
-        private readonly AppDbContext _context;
-
-        public ExtraHoursController(AppDbContext context)
+        private static List<ExtraHour> _extraHours = new List<ExtraHour>
         {
-            _context = context;
-        }
+            new ExtraHour
+            {
+                Id = 1,
+                UserId = 101,
+                Date = new DateTime(2024, 5, 20),
+                StartTime = new TimeSpan(18, 0, 0),
+                EndTime = new TimeSpan(20, 0, 0),
+                Reason = "Proyecto X - Finalización de fase",
+                Status = "Aprobada",
+                RequestedAt = new DateTime(2024, 5, 19, 10, 0, 0),
+                ApprovedRejectedAt = new DateTime(2024, 5, 19, 15, 0, 0),
+                ApprovedRejectedByUserId = 201
+            },
+            new ExtraHour
+            {
+                Id = 2,
+                UserId = 102,
+                Date = new DateTime(2024, 5, 21),
+                StartTime = new TimeSpan(19, 0, 0),
+                EndTime = new TimeSpan(21, 30, 0),
+                Reason = "Mantenimiento de servidor urgente",
+                Status = "Pendiente",
+                RequestedAt = new DateTime(2024, 5, 20, 9, 0, 0)
+            },
+            new ExtraHour
+            {
+                Id = 3,
+                UserId = 101,
+                Date = new DateTime(2024, 5, 22),
+                StartTime = new TimeSpan(17, 0, 0),
+                EndTime = new TimeSpan(19, 0, 0),
+                Reason = "Capacitación interna",
+                Status = "Rechazada",
+                RejectionReason = "No aplica para horas extras",
+                RequestedAt = new DateTime(2024, 5, 21, 14, 0, 0),
+                ApprovedRejectedAt = new DateTime(2024, 5, 21, 16, 0, 0),
+                ApprovedRejectedByUserId = 202
+            }
+        };
+
+        private static int _nextId = _extraHours.Max(eh => eh.Id) + 1;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExtraHour>>> GetExtraHours()
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUserId == null)
-            {
-                return Unauthorized();
-            }
-
-            var extraHoursQuery = _context.ExtraHours
-                                           .Include(eh => eh.User)
-                                           .Include(eh => eh.ApprovedBy)
-                                           .AsQueryable();
-
-            if (User.IsInRole(UserRole.Employee.ToString()))
-            {
-                extraHoursQuery = extraHoursQuery.Where(eh => eh.UserId == int.Parse(currentUserId));
-            }
-
-            return await extraHoursQuery.ToListAsync();
+            return Ok(_extraHours);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ExtraHour>> GetExtraHour(int id)
         {
-            var extraHour = await _context.ExtraHours
-                                          .Include(eh => eh.User)
-                                          .Include(eh => eh.ApprovedBy)
-                                          .FirstOrDefaultAsync(eh => eh.Id == id);
+            var extraHour = _extraHours.FirstOrDefault(eh => eh.Id == id);
 
             if (extraHour == null)
             {
                 return NotFound();
             }
 
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUserId == null) return Unauthorized();
-
-            if (extraHour.UserId != int.Parse(currentUserId) &&
-                !User.IsInRole(UserRole.Manager.ToString()) &&
-                !User.IsInRole(UserRole.Admin.ToString()))
-            {
-                return Forbid();
-            }
-
-            return extraHour;
+            return Ok(extraHour);
         }
 
         [HttpPost]
         public async Task<ActionResult<ExtraHour>> PostExtraHour(ExtraHour extraHour)
         {
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUserId == null) return Unauthorized();
+            extraHour.Id = _nextId++;
+            extraHour.RequestedAt = DateTime.Now;
+            if (extraHour.Status == null) extraHour.Status = "Pendiente";
 
-            if (extraHour.UserId != int.Parse(currentUserId))
-            {
-                return BadRequest("No puedes registrar horas extras para otro usuario.");
-            }
-
-            extraHour.CreatedAt = DateTime.UtcNow;
-            extraHour.UpdatedAt = DateTime.UtcNow;
-            extraHour.Status = ExtraHourStatus.Pending;
-
-            _context.ExtraHours.Add(extraHour);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetExtraHour", new { id = extraHour.Id }, extraHour);
+            _extraHours.Add(extraHour);
+            return CreatedAtAction(nameof(GetExtraHour), new { id = extraHour.Id }, extraHour);
         }
 
         [HttpPut("{id}")]
@@ -100,70 +94,30 @@ namespace ExtraHours.API.Controllers
                 return BadRequest();
             }
 
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUserId == null) return Unauthorized();
-
-            var existingExtraHour = await _context.ExtraHours.AsNoTracking().FirstOrDefaultAsync(eh => eh.Id == id);
-            if (existingExtraHour == null) return NotFound();
-
-            if (User.IsInRole(UserRole.Employee.ToString()))
+            var existingExtraHour = _extraHours.FirstOrDefault(eh => eh.Id == id);
+            if (existingExtraHour == null)
             {
-                if (existingExtraHour.UserId != int.Parse(currentUserId))
-                {
-                    return Forbid("No tienes permiso para modificar las horas de otro usuario.");
-                }
-                if (extraHour.Status != existingExtraHour.Status || extraHour.ApprovedById.HasValue)
-                {
-                    return Forbid("Un empleado no puede cambiar el estado de la solicitud ni aprobarla.");
-                }
-                if (existingExtraHour.Status != ExtraHourStatus.Pending)
-                {
-                    return BadRequest("No puedes modificar una solicitud que ya ha sido procesada.");
-                }
+                return NotFound();
             }
-            else if (User.IsInRole(UserRole.Manager.ToString()) || User.IsInRole(UserRole.Admin.ToString()))
+
+            existingExtraHour.Date = extraHour.Date;
+            existingExtraHour.StartTime = extraHour.StartTime;
+            existingExtraHour.EndTime = extraHour.EndTime;
+            existingExtraHour.Reason = extraHour.Reason;
+            existingExtraHour.Status = extraHour.Status;
+            existingExtraHour.RejectionReason = extraHour.RejectionReason;
+
+            if (existingExtraHour.Status != extraHour.Status)
             {
-                if (extraHour.Status != existingExtraHour.Status)
+                if (extraHour.Status == "Aprobada" || extraHour.Status == "Rechazada")
                 {
-                    if (extraHour.Status == ExtraHourStatus.Approved || extraHour.Status == ExtraHourStatus.Rejected)
-                    {
-                        extraHour.ApprovedById = int.Parse(currentUserId);
-                        extraHour.ApprovedAt = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        extraHour.ApprovedById = null;
-                        extraHour.ApprovedAt = null;
-                    }
+                    existingExtraHour.ApprovedRejectedAt = DateTime.Now;
+                    existingExtraHour.ApprovedRejectedByUserId = 999; // Simulado
                 }
                 else
                 {
-                    extraHour.ApprovedById = existingExtraHour.ApprovedById;
-                    extraHour.ApprovedAt = existingExtraHour.ApprovedAt;
-                }
-            }
-            else
-            {
-                return Forbid();
-            }
-
-            extraHour.UpdatedAt = DateTime.UtcNow;
-
-            _context.Entry(extraHour).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ExtraHourExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    existingExtraHour.ApprovedRejectedAt = null;
+                    existingExtraHour.ApprovedRejectedByUserId = null;
                 }
             }
 
@@ -173,32 +127,14 @@ namespace ExtraHours.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExtraHour(int id)
         {
-            var extraHour = await _context.ExtraHours.FindAsync(id);
+            var extraHour = _extraHours.FirstOrDefault(eh => eh.Id == id);
             if (extraHour == null)
             {
                 return NotFound();
             }
 
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (currentUserId == null) return Unauthorized();
-
-            if (!User.IsInRole(UserRole.Manager.ToString()) && !User.IsInRole(UserRole.Admin.ToString()))
-            {
-                if (extraHour.UserId != int.Parse(currentUserId) || extraHour.Status != ExtraHourStatus.Pending)
-                {
-                    return Forbid();
-                }
-            }
-
-            _context.ExtraHours.Remove(extraHour);
-            await _context.SaveChangesAsync();
-
+            _extraHours.Remove(extraHour);
             return NoContent();
-        }
-
-        private bool ExtraHourExists(int id)
-        {
-            return _context.ExtraHours.Any(e => e.Id == id);
         }
     }
 }

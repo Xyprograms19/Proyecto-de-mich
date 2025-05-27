@@ -7,14 +7,13 @@ namespace ExtraHours.API.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<ExtraHour> ExtraHours { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Department> Departments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasConversion<string>();
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<ExtraHour>()
                 .HasOne(eh => eh.User)
@@ -23,22 +22,19 @@ namespace ExtraHours.API.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ExtraHour>()
-                .HasOne(eh => eh.ApprovedBy)
+                .HasOne(eh => eh.ApprovedRejectedByUser)
                 .WithMany(u => u.ApprovedExtraHours)
-                .HasForeignKey(eh => eh.ApprovedById)
+                .HasForeignKey(eh => eh.ApprovedRejectedByUserId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            modelBuilder.Entity<Department>()
+                .Property(d => d.Name)
+                .IsRequired();
 
-            // modelBuilder.Entity<ExtraHour>().Property(eh => eh.TotalHours).HasColumnType("decimal(5,2)");
-
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Department>()
+                .Property(d => d.Status)
+                .IsRequired();
         }
     }
 }
