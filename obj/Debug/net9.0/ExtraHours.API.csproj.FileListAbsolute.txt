@@ -165,3 +165,6 @@ C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\refint\ExtraH
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.pdb
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ExtraHours.API.genruntimeconfig.cache
 C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\obj\Debug\net9.0\ref\ExtraHours.API.dll
+C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\bin\Debug\net9.0\fronted\jsconfig.json
+C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\bin\Debug\net9.0\fronted\package-lock.json
+C:\Users\mcver\Downloads\Backend_p\ExtraHours.API\bin\Debug\net9.0\fronted\package.json
