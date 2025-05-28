@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
 
-
 namespace ExtraHours.API.Models
 {
     public class User
@@ -49,7 +48,10 @@ namespace ExtraHours.API.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        [InverseProperty("User")]
         public ICollection<ExtraHour>? RegisteredExtraHours { get; set; }
+
+        [InverseProperty("ApprovedRejectedByUser")]
         public ICollection<ExtraHour>? ApprovedExtraHours { get; set; }
     }
 }

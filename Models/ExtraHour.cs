@@ -1,4 +1,3 @@
-
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +11,8 @@ public class ExtraHour
     [Required]
     public int UserId { get; set; }
 
-    public User? User { get; set; } = null!;
+    [ForeignKey("UserId")]
+    public User? User { get; set; }
 
     [Required]
     public DateTime Date { get; set; }
@@ -23,7 +23,6 @@ public class ExtraHour
     [Required]
     public TimeSpan EndTime { get; set; }
 
-
     [NotMapped]
     public double TotalHours => (EndTime - StartTime).TotalHours;
 
@@ -31,16 +30,17 @@ public class ExtraHour
     [StringLength(500)]
     public string Reason { get; set; } = null!;
 
-
     [Required]
     public string Status { get; set; } = "Pendiente";
 
     public string? RejectionReason { get; set; }
 
     public DateTime RequestedAt { get; set; } = DateTime.Now;
+
     public DateTime? ApprovedRejectedAt { get; set; }
 
     public int? ApprovedRejectedByUserId { get; set; }
-    public User? ApprovedRejectedByUser { get; set; }
 
+    [ForeignKey("ApprovedRejectedByUserId")]
+    public User? ApprovedRejectedByUser { get; set; }
 }

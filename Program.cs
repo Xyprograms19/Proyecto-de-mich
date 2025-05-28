@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using ExtraHours.API.Data;
 using ExtraHours.API.Models;
@@ -10,6 +9,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,18 +23,27 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder.WithOrigins("http://localhost:5173")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .AllowCredentials());
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials());
 });
 
-builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 
 
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "ExtraHours API", Version = "v1" });
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "Ingresa el token JWT con el prefijo Bearer. Ejemplo: 'Bearer TU_TOKEN'",
@@ -78,11 +87,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
 builder.Services.AddAuthorization(options =>
 {
+
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(UserRole.Admin.ToString()));
+
     options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole(UserRole.Manager.ToString(), UserRole.Admin.ToString()));
 });
+
 
 var app = builder.Build();
 
@@ -101,8 +114,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigin");
 
-app.UseAuthentication();
-app.UseAuthorization();
+// app.UseAuthentication(); //habilitar la autenticación
+// app.UseAuthorization();  //habilitar la autenticación y autorización
 
 app.MapControllers();
 

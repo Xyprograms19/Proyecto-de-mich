@@ -9,7 +9,7 @@ namespace YourProjectName.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize(Roles = "Admin")] // P restringir el acceso a administradores
+    // [Authorize(Roles = "Admin")]
     public class DepartmentsController : ControllerBase
     {
         private static List<Department> _departments = new List<Department>
