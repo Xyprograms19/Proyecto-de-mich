@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
+using BCrypt.Net;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,10 +124,10 @@ using (var scope = app.Services.CreateScope())
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        usuarioBase.PasswordHash = passwordHasher.HashPassword(usuarioBase, "admin123");
+        usuarioBase.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
         context.Users.Add(usuarioBase);
     }
-    if (!context.Users.Any(u => u.Email == "empleado@ejemplo.com"))
+    if (!context.Users.Any(u => u.Email == "empleado1@ejemplo.com"))
     {
         var empleado = new User
         {
@@ -141,7 +142,7 @@ using (var scope = app.Services.CreateScope())
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        empleado.PasswordHash = passwordHasher.HashPassword(empleado, "empleado123");
+        empleado.PasswordHash = BCrypt.Net.BCrypt.HashPassword("empleado123");
         context.Users.Add(empleado);
     }
 
