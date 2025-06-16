@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +100,53 @@ builder.Services.AddAuthorization(options =>
 
 
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var passwordHasher = new PasswordHasher<User>();
+
+
+    if (!context.Users.Any(u => u.Email == "admin@ejemplo.com"))
+    {
+        var usuarioBase = new User
+        {
+            Username = "admin",
+            Email = "admin@ejemplo.com",
+            FirstName = "Administrador",
+            LastName = "Principal",
+            Role = UserRole.Admin,
+            Department = "Administración",
+            Position = "Administrador General",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        usuarioBase.PasswordHash = passwordHasher.HashPassword(usuarioBase, "admin123");
+        context.Users.Add(usuarioBase);
+    }
+    if (!context.Users.Any(u => u.Email == "empleado@ejemplo.com"))
+    {
+        var empleado = new User
+        {
+            Username = "empleado1",
+            Email = "empleado1@ejemplo.com",
+            FirstName = "Vero",
+            LastName = "Morante",
+            Role = UserRole.Employee,
+            Department = "Ventas",
+            Position = "Vendedora",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        empleado.PasswordHash = passwordHasher.HashPassword(empleado, "empleado123");
+        context.Users.Add(empleado);
+    }
+
+    context.SaveChanges();
+}
 
 
 if (app.Environment.IsDevelopment())
