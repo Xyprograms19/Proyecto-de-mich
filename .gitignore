@@ -1,0 +1,71 @@
+# .gitignore para ExtraHours.API (ASP.NET Core + Frontend)
+
+# Archivos y carpetas de compilación
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de configuración de Rider/VS/VSCode
+.vscode/
+.idea/
+*.code-workspace
+
+# Archivos de logs
+*.log
+
+# Archivos de base de datos locales
+*.db
+*.sqlite
+*.mdf
+*.ldf
+
+# Archivos de configuración de usuario
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# Archivos de publicación
+publish/
+out/
+
+# Archivos de paquetes NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Archivos de dependencias de Node.js (para el frontend)
+fronted/node_modules/
+fronted/dist/
+fronted/.env
+fronted/.env.local
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Otros archivos temporales
+*.tmp
+*.bak
+*.swp
+*.swn
+*.swo
+
+# Archivos de pruebas
+TestResults/
+coverage/
+coverage.info
+
+# Archivos de migraciones generados automáticamente (opcional, si no quieres versionar)
+Migrations/
+
+# Archivos de configuración de entorno
+.env
+.env.*
+
+# Archivos de lock de dependencias
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
