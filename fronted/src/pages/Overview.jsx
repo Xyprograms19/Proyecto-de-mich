@@ -7,13 +7,13 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import userService from "../services/userService";
+import departmentService from "../services/departmentService";
 import extraHourRequestService from "../services/extraHourRequestService";
 
 const Overview = () => {
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [activeUsersCount, setActiveUsersCount] = useState(0);
-  const [pendingExtraHoursCount, setPendingExtraHoursCount] = useState(0);
-
+  const [users, setUsers] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,28 +22,43 @@ const Overview = () => {
       setLoading(true);
       setError(null);
       try {
-        const usersResponse = await userService.getAllUsers();
-        setTotalUsers(usersResponse.data.length);
+        const usersRes = await userService.getAllUsers();
+        setUsers(usersRes.data);
 
-        setActiveUsersCount(
-          usersResponse.data.filter((u) => u.isActive).length
-        );
+        const departmentsRes = await departmentService.getDepartments();
+        setDepartments(departmentsRes.data);
 
-        const pendingHoursResponse =
-          await extraHourRequestService.getPendingExtraHourRequestsCount();
-        setPendingExtraHoursCount(pendingHoursResponse.data);
-
-        await extraHourRequestService.getRecentExtraHourRequests(5);
+        const requestsRes =
+          await extraHourRequestService.getRecentExtraHourRequests(5);
+        setRecentRequests(requestsRes.data);
       } catch (err) {
-        console.error("Error fetching overview data:", err);
-        setError();
+        console.error(err);
+        setError("Error al cargar los datos del resumen.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
+
+  // Estadísticas
+  const totalUsers = users.length;
+  const activeUsersCount = users.filter((u) => u.isActive).length;
+  const pendingExtraHoursCount = recentRequests.filter(
+    (r) => r.status === "Pendiente"
+  ).length;
+
+  const departmentStats = departments.map((dep) => {
+    const employees = users.filter((u) => u.department === dep.name).length;
+    const totalExtraHours = recentRequests
+      .filter((r) => r.department === dep.name)
+      .reduce((sum, r) => sum + (r.hours || 0), 0);
+    return {
+      department: dep.name,
+      employees,
+      totalExtraHours,
+    };
+  });
 
   const cardBg = "bg-white";
   const textColor = "text-gray-900";
@@ -51,7 +66,6 @@ const Overview = () => {
 
   return (
     <div className="space-y-4 p-4 sm:p-6">
-      {/* Mensaje de error */}
       {error && (
         <div
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
@@ -108,26 +122,35 @@ const Overview = () => {
                 <div className={`text-2xl font-bold ${textColor}`}>
                   {pendingExtraHoursCount}
                 </div>
-                <p className="text-xs text-yellow-500 flex items-center mt-1">
-                  <span>Ver solicitudes</span>
-                </p>
+                <p className="text-xs text-yellow-500 flex items-center mt-1"></p>
               </CardContent>
             </Card>
-            {/* Mantengo estos como estáticos por ahora, ya que requieren más lógica de backend/cálculo */}
-            {/* <Card className={cardBg}>
+            <Card className={cardBg}>
               <CardHeader className="pb-2">
                 <CardTitle className={`text-sm font-medium ${subtextColor}`}>
                   Horas Aprobadas (Mes)
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${textColor}`}>283</div>
+                <div className={`text-2xl font-bold ${textColor}`}>
+                  {recentRequests
+                    .filter(
+                      (r) =>
+                        r.status === "Aprobado" &&
+                        new Date(r.dateOfExtraHours || r.date).getMonth() ===
+                          new Date().getMonth() &&
+                        new Date(r.dateOfExtraHours || r.date).getFullYear() ===
+                          new Date().getFullYear()
+                    )
+                    .reduce((sum, r) => sum + (r.hours || 0), 0)}
+                </div>
                 <p className="text-xs text-blue-500 flex items-center mt-1">
-                  <span>$18,450 en compensación</span>
+                  <span>Horas aprobadas este mes</span>
                 </p>
               </CardContent>
-            </Card> */}
-            {/* <Card className={cardBg}>
+            </Card>
+
+            <Card className={cardBg}>
               <CardHeader className="pb-2">
                 <CardTitle className={`text-sm font-medium ${subtextColor}`}>
                   Departamentos Activos
@@ -135,17 +158,17 @@ const Overview = () => {
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${textColor}`}>
-                  {departmentStats.length}
+                  {departments.filter((dep) => dep.status === "Activo").length}
                 </div>
-                <p className={`text-xs ${subtextColor} flex items-center mt-1`}>
-                  <span>{totalUsers} empleados en total</span>
+                <p className="text-xs text-gray-500 flex items-center mt-1">
+                  <span>{departments.length} departamentos en total</span>
                 </p>
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* <Card className={cardBg}>
+            <Card className={cardBg}>
               <CardHeader>
                 <CardTitle className={textColor}>
                   Solicitudes Recientes
@@ -182,7 +205,7 @@ const Overview = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentExtraHoursRequests.length === 0 ? (
+                      {recentRequests.length === 0 ? (
                         <tr>
                           <td
                             colSpan="4"
@@ -193,19 +216,19 @@ const Overview = () => {
                           </td>
                         </tr>
                       ) : (
-                        recentExtraHoursRequests.map((request) => (
+                        recentRequests.map((request) => (
                           <tr
                             key={request.id}
                             className="border-b hover:bg-gray-50"
                           >
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.user}
+                              {request.userName || request.user || ""}
                             </td>
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.date}
+                              {request.date || request.dateOfExtraHours || ""}
                             </td>
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.type}
+                              {request.type || request.extraHourType || ""}
                             </td>
                             <td className="py-2 px-1 text-sm">
                               <span
@@ -227,9 +250,9 @@ const Overview = () => {
                   </table>
                 </div>
               </CardContent>
-            </Card> */}
+            </Card>
 
-            {/* <Card className={cardBg}>
+            <Card className={cardBg}>
               <CardHeader>
                 <CardTitle className={textColor}>Departamentos</CardTitle>
                 <CardDescription className={subtextColor}>
@@ -288,7 +311,7 @@ const Overview = () => {
                   </table>
                 </div>
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
         </>
       )}

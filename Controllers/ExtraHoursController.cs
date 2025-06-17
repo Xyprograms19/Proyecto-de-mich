@@ -50,6 +50,29 @@ namespace ExtraHours.API.Controllers
             return extraHour;
         }
 
+        [HttpGet("departments")]
+        public async Task<IActionResult> GetDepartments()
+        {
+            var departments = await _context.Departments.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+            var extraHours = await _context.ExtraHours.ToListAsync();
+
+            var result = departments.Select(d => new Department
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Employees = d.Employees,
+                Status = d.Status,
+                TotalExtraHours = (int)Math.Round(
+                    extraHours
+                        .Where(eh => users.Any(u => u.Id == eh.UserId && u.Department == d.Name))
+                        .Sum(eh => (eh.EndTime - eh.StartTime).TotalHours)
+                )
+            }).ToList();
+
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<ActionResult<ExtraHour>> PostExtraHour([FromBody] ExtraHour extraHour)
         {

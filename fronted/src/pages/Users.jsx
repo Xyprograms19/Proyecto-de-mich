@@ -8,6 +8,7 @@ const Users = () => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [departmentsList, setDepartmentsList] = useState([]);
 
   const [currentUser, setCurrentUser] = useState({
     id: null,
@@ -50,6 +51,7 @@ const Users = () => {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.message || errorData.detail || errorText;
         } catch (jsonError) {
+          console.error(jsonError);
           console.warn("La respuesta de error no es JSON:", errorText);
         }
         throw new Error(errorMessage);
@@ -81,7 +83,16 @@ const Users = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    fetch("http://localhost:5023/api/departments")
+      .then((res) => res.json())
+      .then((data) => setDepartmentsList(data))
+      .catch(() => setDepartmentsList([]));
   }, []);
+
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, []);
 
   const handleOpenModal = (user = null) => {
     setIsModalOpen(true);
@@ -200,6 +211,7 @@ const Users = () => {
             JSON.stringify(errorData.errors) ||
             errorText;
         } catch (jsonError) {
+          console.error(jsonError);
           console.warn("La respuesta de error no es JSON:", errorText);
         }
         throw new Error(errorMessage);
@@ -408,14 +420,20 @@ const Users = () => {
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 mb-1">Departamento</label>
-              <input
-                type="text"
+              <select
                 className="w-full px-3 py-2 border rounded bg-white text-gray-900"
                 value={currentUser.department}
                 onChange={(e) =>
                   setCurrentUser({ ...currentUser, department: e.target.value })
                 }
-              />
+              >
+                <option value="">Selecciona un departamento</option>
+                {departmentsList.map((dep) => (
+                  <option key={dep.id} value={dep.name}>
+                    {dep.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 mb-1">Puesto</label>

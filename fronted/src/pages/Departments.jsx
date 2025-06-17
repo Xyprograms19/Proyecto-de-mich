@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import departmentService from "../services/departmentService";
-import { useTheme } from "../context/ThemeContext";
+import axios from "axios";
 import {
   XCircle,
   PlusCircle,
@@ -8,54 +7,21 @@ import {
   Trash2,
   Save,
   Undo2,
-  Briefcase,
   Users,
   Clock,
   CircleDotDashed,
 } from "lucide-react";
 
 const Departments = () => {
-  const { isLightTheme } = useTheme();
-
   const [departments, setDepartments] = useState([]);
   const [editingDepartment, setEditingDepartment] = useState(null);
   const [newDepartment, setNewDepartment] = useState({
     name: "",
     employees: "",
-    totalExtraHours: "",
     status: "Activo",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const colors = {
-    light: {
-      primary: "#3B82F6",
-      accent: "#10B981",
-      background: "#F3F4F6",
-      cardBackground: "#FFFFFF",
-      text: "#1F2937",
-      subtleText: "#6B7280",
-      border: "#E5E7EB",
-      success: "#10B981",
-      danger: "#EF4444",
-      info: "#3B82F6",
-    },
-    dark: {
-      primary: "#60A5FA",
-      accent: "#34D399",
-      background: "#111827",
-      cardBackground: "#1F2937",
-      text: "#F9FAFB",
-      subtleText: "#9CA3AF",
-      border: "#374151",
-      success: "#34D399",
-      danger: "#F87171",
-      info: "#60A5FA",
-    },
-  };
-
-  const currentTheme = isLightTheme ? colors.light : colors.dark;
 
   useEffect(() => {
     fetchDepartments();
@@ -65,37 +31,57 @@ const Departments = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await departmentService.getDepartments();
+      const response = await axios.get("http://localhost:5023/api/departments");
       setDepartments(response.data);
     } catch (err) {
-      console.error("Error fetching departments:", err);
+      console.error(err);
       setError("No se pudieron cargar los departamentos.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddDepartment = async () => {
+  const handleChange = (e) => {
+    setNewDepartment({
+      ...newDepartment,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
     try {
-      const departmentToAdd = {
-        ...newDepartment,
+      const departmentData = {
+        name: newDepartment.name,
         employees: parseInt(newDepartment.employees) || 0,
-        totalExtraHours: parseInt(newDepartment.totalExtraHours) || 0,
+        status: newDepartment.status,
       };
-      const response = await departmentService.createDepartment(
-        departmentToAdd
-      );
-      setDepartments([...departments, response.data]);
-      setNewDepartment({
-        name: "",
-        employees: "",
-        totalExtraHours: "",
-        status: "Activo",
-      });
-      setEditingDepartment(null);
+
+      if (editingDepartment && editingDepartment.id) {
+        await axios.put(
+          `http://localhost:5023/api/departments/${editingDepartment.id}`,
+          departmentData
+        );
+        setDepartments(
+          departments.map((department) =>
+            department.id === editingDepartment.id
+              ? { ...department, ...departmentData }
+              : department
+          )
+        );
+        setEditingDepartment(null);
+      } else {
+        const response = await axios.post(
+          "http://localhost:5023/api/departments",
+          departmentData
+        );
+        setDepartments([...departments, response.data]);
+      }
+      setNewDepartment({ name: "", employees: "", status: "Activo" });
     } catch (err) {
-      console.error("Error adding department:", err);
-      setError("No se pudo agregar el departamento.");
+      console.error(err);
+      setError("No se pudo guardar el departamento.");
     }
   };
 
@@ -104,12 +90,12 @@ const Departments = () => {
       window.confirm("¿Estás seguro de que quieres eliminar este departamento?")
     ) {
       try {
-        await departmentService.deleteDepartment(id);
+        await axios.delete(`http://localhost:5023/api/departments/${id}`);
         setDepartments(
           departments.filter((department) => department.id !== id)
         );
       } catch (err) {
-        console.error("Error deleting department:", err);
+        console.error(err);
         setError("No se pudo eliminar el departamento.");
       }
     }
@@ -117,38 +103,11 @@ const Departments = () => {
 
   const handleEditDepartment = (department) => {
     setEditingDepartment(department);
-    setNewDepartment(department);
-  };
-
-  const handleSaveEdit = async () => {
-    try {
-      const departmentToUpdate = {
-        ...newDepartment,
-        employees: parseInt(newDepartment.employees) || 0,
-        totalExtraHours: parseInt(newDepartment.totalExtraHours) || 0,
-      };
-      await departmentService.updateDepartment(
-        editingDepartment.id,
-        departmentToUpdate
-      );
-      setDepartments(
-        departments.map((department) =>
-          department.id === editingDepartment.id
-            ? departmentToUpdate
-            : department
-        )
-      );
-      setEditingDepartment(null);
-      setNewDepartment({
-        name: "",
-        employees: "",
-        totalExtraHours: "",
-        status: "Activo",
-      });
-    } catch (err) {
-      console.error("Error saving department edit:", err);
-      setError("No se pudo guardar la edición del departamento.");
-    }
+    setNewDepartment({
+      name: department.name,
+      employees: department.employees,
+      status: department.status,
+    });
   };
 
   const handleCancelEdit = () => {
@@ -156,167 +115,87 @@ const Departments = () => {
     setNewDepartment({
       name: "",
       employees: "",
-      totalExtraHours: "",
       status: "Activo",
     });
   };
 
   const renderDepartmentForm = () => (
-    <div
-      className="mt-8 p-6 rounded shadow-lg transition-all duration-300 ease-in-out"
-      style={{
-        backgroundColor: currentTheme.cardBackground,
-        color: currentTheme.text,
-        border: `1px solid ${currentTheme.border}`,
-      }}
-    >
-      <h2
-        className="text-xl font-bold mb-4"
-        style={{ color: currentTheme.primary }}
-      >
+    <div className="mt-8 p-6 rounded shadow-lg transition-all duration-300 ease-in-out bg-white">
+      <h2 className="text-xl font-bold mb-4 text-blue-600">
         {editingDepartment && editingDepartment.id
           ? "Editar Departamento"
           : "Nuevo Departamento"}
       </h2>
-      <div className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: currentTheme.subtleText }}
-          >
+          <label className="block text-sm font-medium text-gray-500">
             Nombre
           </label>
           <input
             type="text"
+            name="name"
             className="w-full px-4 py-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500"
-            style={{
-              backgroundColor: isLightTheme ? "#f9fafb" : "#374151",
-              borderColor: currentTheme.border,
-              color: currentTheme.text,
-            }}
             value={newDepartment.name}
-            onChange={(e) =>
-              setNewDepartment({ ...newDepartment, name: e.target.value })
-            }
+            onChange={handleChange}
+            required
           />
         </div>
         <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: currentTheme.subtleText }}
-          >
+          <label className="block text-sm font-medium text-gray-500">
             Empleados
           </label>
           <input
             type="number"
+            name="employees"
             className="w-full px-4 py-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500"
-            style={{
-              backgroundColor: isLightTheme ? "#f9fafb" : "#374151",
-              borderColor: currentTheme.border,
-              color: currentTheme.text,
-            }}
             value={newDepartment.employees}
-            onChange={(e) =>
-              setNewDepartment({ ...newDepartment, employees: e.target.value })
-            }
+            onChange={handleChange}
+            required
           />
         </div>
         <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: currentTheme.subtleText }}
-          >
-            Horas Extras (Mes)
-          </label>
-          <input
-            type="number"
-            className="w-full px-4 py-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500"
-            style={{
-              backgroundColor: isLightTheme ? "#f9fafb" : "#374151",
-              borderColor: currentTheme.border,
-              color: currentTheme.text,
-            }}
-            value={newDepartment.totalExtraHours}
-            onChange={(e) =>
-              setNewDepartment({
-                ...newDepartment,
-                totalExtraHours: e.target.value,
-              })
-            }
-          />
-        </div>
-        <div>
-          <label
-            className="block text-sm font-medium"
-            style={{ color: currentTheme.subtleText }}
-          >
+          <label className="block text-sm font-medium text-gray-500">
             Estado
           </label>
           <select
+            name="status"
             className="w-full px-4 py-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500"
-            style={{
-              backgroundColor: isLightTheme ? "#f9fafb" : "#374151",
-              borderColor: currentTheme.border,
-              color: currentTheme.text,
-            }}
             value={newDepartment.status}
-            onChange={(e) =>
-              setNewDepartment({ ...newDepartment, status: e.target.value })
-            }
+            onChange={handleChange}
           >
             <option value="Activo">Activo</option>
             <option value="Inactivo">Inactivo</option>
           </select>
         </div>
-      </div>
-      <div className="flex justify-end mt-6 space-x-3">
-        <button
-          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200"
-          style={{
-            backgroundColor: currentTheme.border,
-            color: currentTheme.subtleText,
-          }}
-          onClick={handleCancelEdit}
-        >
-          <Undo2 size={18} className="mr-2" /> Cancelar
-        </button>
-        <button
-          className="flex items-center px-4 py-2 rounded-lg transition-colors duration-200"
-          style={{
-            backgroundColor: currentTheme.primary,
-            color: "white",
-          }}
-          onClick={
-            editingDepartment && editingDepartment.id
-              ? handleSaveEdit
-              : handleAddDepartment
-          }
-        >
-          <Save size={18} className="mr-2" />
-          {editingDepartment && editingDepartment.id
-            ? "Guardar Cambios"
-            : "Agregar Departamento"}
-        </button>
-      </div>
+        <div className="flex justify-end mt-6 space-x-3">
+          <button
+            type="button"
+            className="flex items-center px-4 py-2 rounded-lg bg-gray-200 text-gray-600"
+            onClick={handleCancelEdit}
+          >
+            <Undo2 size={18} className="mr-2" /> Cancelar
+          </button>
+          <button
+            type="submit"
+            className="flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white"
+          >
+            <Save size={18} className="mr-2" />
+            {editingDepartment && editingDepartment.id
+              ? "Guardar Cambios"
+              : "Agregar Departamento"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 
   return (
-    <div
-      className="min-h-screen p-4 sm:p-6"
-      style={{
-        backgroundColor: currentTheme.background,
-        color: currentTheme.text,
-      }}
-    >
+    <div className="min-h-screen p-4 sm:p-6 bg-gray-100 text-gray-900">
       <div className="max-w-4xl mx-auto">
-        <h1
-          className="text-3xl font-extrabold mb-2"
-          style={{ color: currentTheme.primary }}
-        >
+        <h1 className="text-3xl font-extrabold mb-2 text-blue-600">
           Panel de Administración
         </h1>
-        <p className="text-lg mb-8" style={{ color: currentTheme.subtleText }}>
+        <p className="text-lg mb-8 text-gray-500">
           Gestión Centralizada de Departamentos
         </p>
 
@@ -340,64 +219,40 @@ const Departments = () => {
         )}
 
         {loading ? (
-          <div
-            className="text-center py-8"
-            style={{ color: currentTheme.subtleText }}
-          >
+          <div className="text-center py-8 text-gray-500">
             Cargando departamentos...
           </div>
         ) : (
           <>
             {renderDepartmentForm()}
 
-            <div
-              className="mt-8 p-6 rounded shadow-lg"
-              style={{
-                backgroundColor: currentTheme.cardBackground,
-                border: `1px solid ${currentTheme.border}`,
-              }}
-            >
+            <div className="mt-8 p-6 rounded shadow-lg bg-white">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h2
-                    className="text-2xl font-bold"
-                    style={{ color: currentTheme.text }}
-                  >
+                  <h2 className="text-2xl font-bold text-gray-900">
                     Lista de Departamentos
                   </h2>
-                  <p
-                    className="text-md"
-                    style={{ color: currentTheme.subtleText }}
-                  >
+                  <p className="text-md text-gray-500">
                     Visualiza y gestiona todos los departamentos existentes.
                   </p>
                 </div>
                 {!editingDepartment && (
                   <button
-                    className="flex items-center px-5 py-2 rounded-lg text-white transition-colors duration-200"
-                    style={{
-                      backgroundColor: currentTheme.accent,
-                    }}
+                    className="flex items-center px-5 py-2 rounded-lg text-white bg-green-500"
                     onClick={() =>
                       setEditingDepartment({
                         id: null,
                         name: "",
                         employees: "",
-                        totalExtraHours: "",
                         status: "Activo",
                       })
                     }
-                  >
-                    <PlusCircle size={20} className="mr-2" /> Nuevo Departamento
-                  </button>
+                  ></button>
                 )}
               </div>
 
               {departments.length === 0 ? (
-                <div
-                  className="text-center py-4"
-                  style={{ color: currentTheme.subtleText }}
-                >
+                <div className="text-center py-4 text-gray-500">
                   No hay departamentos para mostrar. Agrega uno nuevo.
                 </div>
               ) : (
@@ -405,67 +260,39 @@ const Departments = () => {
                   {departments.map((department) => (
                     <div
                       key={department.id}
-                      className="p-6 rounded-lg shadow-md transition-transform duration-200 ease-in-out hover:scale-[1.02] relative"
-                      style={{
-                        backgroundColor: currentTheme.cardBackground,
-                        border: `1px solid ${currentTheme.border}`,
-                      }}
+                      className="p-6 rounded-lg shadow-md bg-gray-50 hover:scale-[1.02] relative"
                     >
-                      <h3
-                        className="text-xl font-bold mb-3"
-                        style={{ color: currentTheme.primary }}
-                      >
+                      <h3 className="text-xl font-bold mb-3 text-blue-600">
                         {department.name}
                       </h3>
-                      <div
-                        className="space-y-2 text-sm"
-                        style={{ color: currentTheme.subtleText }}
-                      >
+                      <div className="space-y-2 text-sm text-gray-500">
                         <div className="flex items-center">
-                          <Users
-                            size={16}
-                            className="mr-2"
-                            color={currentTheme.text}
-                          />
+                          <Users size={16} className="mr-2" />
                           <span>
                             Empleados:{" "}
-                            <span
-                              className="font-semibold"
-                              style={{ color: currentTheme.text }}
-                            >
+                            <span className="font-semibold text-gray-900">
                               {department.employees}
                             </span>
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <Clock
-                            size={16}
-                            className="mr-2"
-                            color={currentTheme.text}
-                          />
+                          <Clock size={16} className="mr-2" />
                           <span>
                             Horas Extras (Mes):{" "}
-                            <span
-                              className="font-semibold"
-                              style={{ color: currentTheme.text }}
-                            >
+                            <span className="font-semibold text-gray-900">
                               {department.totalExtraHours}
                             </span>
                           </span>
                         </div>
                         <div className="flex items-center">
-                          <CircleDotDashed
-                            size={16}
-                            className="mr-2"
-                            color={currentTheme.text}
-                          />
+                          <CircleDotDashed size={16} className="mr-2" />
                           <span>
                             Estado:
                             <span
                               className={`ml-2 px-3 py-1 rounded-full text-xs font-medium ${
                                 department.status === "Activo"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
                               }`}
                             >
                               {department.status}
@@ -477,13 +304,13 @@ const Departments = () => {
                       <div className="flex justify-end space-x-3 mt-4">
                         <button
                           onClick={() => handleEditDepartment(department)}
-                          className="flex items-center text-blue-500 hover:text-blue-700 transition-colors duration-200"
+                          className="flex items-center text-blue-500 hover:text-blue-700"
                         >
                           <Edit size={16} className="mr-1" /> Editar
                         </button>
                         <button
                           onClick={() => handleDeleteDepartment(department.id)}
-                          className="flex items-center text-red-500 hover:text-red-700 transition-colors duration-200"
+                          className="flex items-center text-red-500 hover:text-red-700"
                         >
                           <Trash2 size={16} className="mr-1" /> Eliminar
                         </button>

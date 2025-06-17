@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace ExtraHours.API.Models
@@ -11,6 +12,7 @@ namespace ExtraHours.API.Models
         public int Id { get; set; }
 
         public int UserId { get; set; }
+        [JsonIgnore]
         public User User { get; set; }
 
         [Required]
@@ -43,6 +45,7 @@ namespace ExtraHours.API.Models
         public DateTime? ApprovedRejectedAt { get; set; }
 
         public int? ApprovedRejectedByUserId { get; set; }
+        [JsonIgnore]
         public User ApprovedRejectedByUser { get; set; }
     }
 }

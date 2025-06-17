@@ -61,6 +61,11 @@ const AdminDashboard = () => {
       label: "Solicitudes",
       icon: <ClipboardList className="h-4 w-4" />,
     },
+    {
+      id: "departments",
+      label: "Departamentos",
+      icon: <Building2 className="h-4 w-4" />,
+    },
   ];
 
   return (
