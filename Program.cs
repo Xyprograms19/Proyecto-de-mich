@@ -108,6 +108,25 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var passwordHasher = new PasswordHasher<User>();
 
+    if (!context.Departments.Any(d => d.Name == "Administración"))
+    {
+        context.Departments.Add(new Department
+        {
+            Name = "Administración",
+            Employees = 0,
+            Status = "Activo"
+        });
+    }
+    if (!context.Departments.Any(d => d.Name == "Ventas"))
+    {
+        context.Departments.Add(new Department
+        {
+            Name = "Ventas",
+            Employees = 0,
+            Status = "Activo"
+        });
+    }
+
 
     if (!context.Users.Any(u => u.Email == "admin@ejemplo.com"))
     {
