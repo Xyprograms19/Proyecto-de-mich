@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExtraHours.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cec846d9820fef131e7c7499c79140b993fd4f15")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42ef1b18344b85cf25dc63d5147722413e78d0ee")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExtraHours.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExtraHours.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

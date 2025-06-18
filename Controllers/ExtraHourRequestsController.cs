@@ -1,13 +1,11 @@
-
 using Microsoft.AspNetCore.Mvc;
-using ExtraHours.API.Data;
 using ExtraHours.API.Models;
 using ExtraHours.API.DTOs;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+
 namespace ExtraHours.API.Controllers
 {
     [ApiController]
@@ -15,68 +13,42 @@ namespace ExtraHours.API.Controllers
     [Authorize]
     public class ExtraHourRequestsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IExtraHourRequestService _service;
 
-        public ExtraHourRequestsController(AppDbContext context)
+        public ExtraHourRequestsController(IExtraHourRequestService service)
         {
-            _context = context;
+            _service = service;
         }
 
         [HttpPost]
         public async Task<ActionResult<ExtraHourRequest>> CreateExtraHourRequest(ExtraHourRequestCreateDto requestDto)
         {
-
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int parsedUserId))
             {
                 return Unauthorized("User ID not found in token.");
             }
 
-
-            int parsedUserId;
-
-
-            if (!int.TryParse(userId, out parsedUserId))
-            {
-                return BadRequest("Invalid user ID format in token.");
-            }
-
-
-
-            var newRequest = new ExtraHourRequest
-            {
-                UserId = parsedUserId,
-                DateOfExtraHours = requestDto.DateOfExtraHours,
-                StartTime = requestDto.StartTime,
-                EndTime = requestDto.EndTime,
-                ExtraHourTypeId = requestDto.ExtraHourTypeId,
-                Reason = requestDto.Reason,
-                Status = "Pendiente",
-                RequestDate = DateTime.UtcNow,
-                AdminComments = null
-            };
-
-            _context.ExtraHourRequests.Add(newRequest);
-            await _context.SaveChangesAsync();
-
-
-
+            var newRequest = await _service.CreateAsync(parsedUserId, requestDto);
             return CreatedAtAction(nameof(GetExtraHourRequest), new { id = newRequest.Id }, newRequest);
         }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ExtraHourRequest>> GetExtraHourRequest(int id)
         {
-            var request = await _context.ExtraHourRequests
-                .Include(r => r.User)
-
-                .FirstOrDefaultAsync(r => r.Id == id);
-
+            var request = await _service.GetByIdAsync(id);
             if (request == null)
             {
                 return NotFound();
             }
-
             return Ok(request);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ExtraHourRequest>>> GetAllExtraHourRequests()
+        {
+            var requests = await _service.GetAllAsync();
+            return Ok(requests);
         }
     }
 }

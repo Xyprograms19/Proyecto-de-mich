@@ -76,7 +76,11 @@ const ExtraHours = () => {
   };
 
   const handleDeleteType = async (id) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este tipo de hora extra?")) {
+    if (
+      window.confirm(
+        "¿Estás seguro de que quieres eliminar este tipo de hora extra?"
+      )
+    ) {
       try {
         await extraHourTypeService.deleteExtraHourType(id);
         setExtraHoursTypes(extraHoursTypes.filter((type) => type.id !== id));
@@ -87,7 +91,9 @@ const ExtraHours = () => {
     }
   };
 
-  const handleOpenModal = (type = { id: null, type: "", multiplier: "", status: "Activo" }) => {
+  const handleOpenModal = (
+    type = { id: null, type: "", multiplier: "", status: "Activo" }
+  ) => {
     setCurrentType(type);
     setIsEditMode(!!type.id);
     setIsModalOpen(true);
@@ -106,10 +112,19 @@ const ExtraHours = () => {
       };
 
       if (isEditMode) {
-        await extraHourTypeService.updateExtraHourType(typeToSave.id, typeToSave);
-        setExtraHoursTypes(extraHoursTypes.map((type) => (type.id === typeToSave.id ? typeToSave : type)));
+        await extraHourTypeService.updateExtraHourType(
+          typeToSave.id,
+          typeToSave
+        );
+        setExtraHoursTypes(
+          extraHoursTypes.map((type) =>
+            type.id === typeToSave.id ? typeToSave : type
+          )
+        );
       } else {
-        const response = await extraHourTypeService.createExtraHourType(typeToSave);
+        const response = await extraHourTypeService.createExtraHourType(
+          typeToSave
+        );
         setExtraHoursTypes([...extraHoursTypes, response.data]);
       }
       handleCloseModal();
@@ -128,7 +143,10 @@ const ExtraHours = () => {
       }}
     >
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-extrabold mb-2" style={{ color: currentTheme.primary }}>
+        <h1
+          className="text-3xl font-extrabold mb-2"
+          style={{ color: currentTheme.primary }}
+        >
           Panel de Administración
         </h1>
         <p className="text-lg mb-8" style={{ color: currentTheme.subtleText }}>
@@ -142,14 +160,23 @@ const ExtraHours = () => {
           >
             <strong className="font-bold">¡Error!</strong>
             <span className="block sm:inline"> {error}</span>
-            <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setError(null)}>
-              <XCircle size={18} className="text-red-500 hover:text-red-700 cursor-pointer" />
+            <span
+              className="absolute top-0 bottom-0 right-0 px-4 py-3"
+              onClick={() => setError(null)}
+            >
+              <XCircle
+                size={18}
+                className="text-red-500 hover:text-red-700 cursor-pointer"
+              />
             </span>
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-8" style={{ color: currentTheme.subtleText }}>
+          <div
+            className="text-center py-8"
+            style={{ color: currentTheme.subtleText }}
+          >
             Cargando tipos de horas extras...
           </div>
         ) : (
@@ -162,11 +189,18 @@ const ExtraHours = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-2xl font-bold" style={{ color: currentTheme.text }}>
+                <h2
+                  className="text-2xl font-bold"
+                  style={{ color: currentTheme.text }}
+                >
                   Tipos de Horas Extras
                 </h2>
-                <p className="text-md" style={{ color: currentTheme.subtleText }}>
-                  Administra las categorías y multiplicadores para el cálculo de horas extras.
+                <p
+                  className="text-md"
+                  style={{ color: currentTheme.subtleText }}
+                >
+                  Administra las categorías y multiplicadores para el cálculo de
+                  horas extras.
                 </p>
               </div>
               <button
@@ -181,31 +215,52 @@ const ExtraHours = () => {
             </div>
 
             {extraHoursTypes.length === 0 ? (
-              <div className="text-center py-4" style={{ color: currentTheme.subtleText }}>
+              <div
+                className="text-center py-4"
+                style={{ color: currentTheme.subtleText }}
+              >
                 No hay tipos de horas extras para mostrar. Agrega uno nuevo.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y" style={{ borderColor: currentTheme.border }}>
+                <table
+                  className="min-w-full divide-y"
+                  style={{ borderColor: currentTheme.border }}
+                >
                   <thead
                     style={{
                       backgroundColor: isLightTheme ? "#F9FAFB" : "#1F2937",
                     }}
                   >
                     <tr>
-                      <th className="py-3 px-4 text-center text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.subtleText }}>
+                      <th
+                        className="py-3 px-4 text-center text-xs font-medium uppercase tracking-wider"
+                        style={{ color: currentTheme.subtleText }}
+                      >
                         ID
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.subtleText }}>
+                      <th
+                        className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider"
+                        style={{ color: currentTheme.subtleText }}
+                      >
                         Tipo
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.subtleText }}>
+                      <th
+                        className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider"
+                        style={{ color: currentTheme.subtleText }}
+                      >
                         Multiplicador
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.subtleText }}>
+                      <th
+                        className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider"
+                        style={{ color: currentTheme.subtleText }}
+                      >
                         Estado
                       </th>
-                      <th className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider" style={{ color: currentTheme.subtleText }}>
+                      <th
+                        className="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider"
+                        style={{ color: currentTheme.subtleText }}
+                      >
                         Acciones
                       </th>
                     </tr>
@@ -218,28 +273,60 @@ const ExtraHours = () => {
                     }}
                   >
                     {extraHoursTypes.map((type) => (
-                      <tr key={type.id} className="transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="py-2 px-4 text-center text-sm" style={{ color: currentTheme.text }}>
+                      <tr
+                        key={type.id}
+                        className="transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <td
+                          className="py-2 px-4 text-center text-sm"
+                          style={{ color: currentTheme.text }}
+                        >
                           {type.id}
                         </td>
-                        <td className="py-2 px-4 text-left text-sm flex items-center" style={{ color: currentTheme.text }}>
-                          <ListPlus size={16} className="mr-2" style={{ color: currentTheme.subtleText }} />
+                        <td
+                          className="py-2 px-4 text-left text-sm flex items-center"
+                          style={{ color: currentTheme.text }}
+                        >
+                          <ListPlus
+                            size={16}
+                            className="mr-2"
+                            style={{ color: currentTheme.subtleText }}
+                          />
                           {type.type}
                         </td>
-                        <td className="py-2 px-4 text-left text-sm flex items-center" style={{ color: currentTheme.text }}>
-                          <Percent size={16} className="mr-2" style={{ color: currentTheme.subtleText }} />
+                        <td
+                          className="py-2 px-4 text-left text-sm flex items-center"
+                          style={{ color: currentTheme.text }}
+                        >
+                          <Percent
+                            size={16}
+                            className="mr-2"
+                            style={{ color: currentTheme.subtleText }}
+                          />
                           {type.multiplier.toFixed(2)}
                         </td>
                         <td className="py-2 px-4 text-left text-sm">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${type.status === "Activo" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300" : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"}`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              type.status === "Activo"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                            }`}
+                          >
                             {type.status}
                           </span>
                         </td>
                         <td className="py-2 px-4 text-left text-sm">
-                          <button onClick={() => handleOpenModal(type)} className="text-blue-500 hover:text-blue-700 transition-colors duration-200 flex items-center">
+                          <button
+                            onClick={() => handleOpenModal(type)}
+                            className="text-blue-500 hover:text-blue-700 transition-colors duration-200 flex items-center"
+                          >
                             <Edit size={16} className="mr-1" /> Editar
                           </button>
-                          <button onClick={() => handleDeleteType(type.id)} className="text-red-500 hover:text-red-700 transition-colors duration-200 ml-3 flex items-center">
+                          <button
+                            onClick={() => handleDeleteType(type.id)}
+                            className="text-red-500 hover:text-red-700 transition-colors duration-200 ml-3 flex items-center"
+                          >
                             <Trash2 size={16} className="mr-1" /> Eliminar
                           </button>
                         </td>
@@ -262,12 +349,18 @@ const ExtraHours = () => {
                 border: `1px solid ${currentTheme.border}`,
               }}
             >
-              <h2 className="text-2xl font-bold mb-4" style={{ color: currentTheme.primary }}>
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{ color: currentTheme.primary }}
+              >
                 {isEditMode ? "Editar Tipo" : "Nuevo Tipo"}
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.subtleText }}>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: currentTheme.subtleText }}
+                  >
                     Tipo
                   </label>
                   <input
@@ -279,11 +372,16 @@ const ExtraHours = () => {
                       color: currentTheme.text,
                     }}
                     value={currentType.type}
-                    onChange={(e) => setCurrentType({ ...currentType, type: e.target.value })}
+                    onChange={(e) =>
+                      setCurrentType({ ...currentType, type: e.target.value })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.subtleText }}>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: currentTheme.subtleText }}
+                  >
                     Multiplicador
                   </label>
                   <input
@@ -296,11 +394,19 @@ const ExtraHours = () => {
                       color: currentTheme.text,
                     }}
                     value={currentType.multiplier}
-                    onChange={(e) => setCurrentType({ ...currentType, multiplier: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setCurrentType({
+                        ...currentType,
+                        multiplier: parseFloat(e.target.value),
+                      })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: currentTheme.subtleText }}>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: currentTheme.subtleText }}
+                  >
                     Estado
                   </label>
                   <select
@@ -311,7 +417,9 @@ const ExtraHours = () => {
                       color: currentTheme.text,
                     }}
                     value={currentType.status}
-                    onChange={(e) => setCurrentType({ ...currentType, status: e.target.value })}
+                    onChange={(e) =>
+                      setCurrentType({ ...currentType, status: e.target.value })
+                    }
                   >
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>

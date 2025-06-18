@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using ExtraHours.API.Data;
 using ExtraHours.API.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 
 namespace ExtraHours.API.Controllers
 {
@@ -12,71 +9,51 @@ namespace ExtraHours.API.Controllers
     [Route("api/[controller]")]
     public class DepartmentsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IDepartmentService _departmentService;
 
-        public DepartmentsController(AppDbContext context)
+        public DepartmentsController(IDepartmentService departmentService)
         {
-            _context = context;
+            _departmentService = departmentService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetDepartments()
         {
-            var departments = await _context.Departments.ToListAsync();
-            var users = await _context.Users.ToListAsync();
-            var extraHours = await _context.ExtraHours.ToListAsync();
-
-            var result = departments.Select(d => new Department
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Employees = d.Employees,
-                Status = d.Status,
-                TotalExtraHours = (int)Math.Round(
-                    extraHours
-                        .Where(eh => users.Any(u => u.Id == eh.UserId && u.Department == d.Name))
-                        .Sum(eh => (eh.EndTime - eh.StartTime).TotalHours)
-                )
-            }).ToList();
-
-            return Ok(result);
+            var departments = await _departmentService.GetAllAsync();
+            return Ok(departments);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDepartment(int id)
+        {
+            var department = await _departmentService.GetByIdAsync(id);
+            if (department == null)
+                return NotFound();
+            return Ok(department);
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateDepartment([FromBody] Department department)
         {
-            _context.Departments.Add(department);
-            await _context.SaveChangesAsync();
-            return Ok(department);
+            var created = await _departmentService.CreateAsync(department);
+            return Ok(created);
         }
-
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDepartment(int id, [FromBody] Department department)
         {
-            var existing = await _context.Departments.FindAsync(id);
-            if (existing == null)
+            var updated = await _departmentService.UpdateAsync(id, department);
+            if (updated == null)
                 return NotFound();
-
-            existing.Name = department.Name;
-            existing.Employees = department.Employees;
-            existing.Status = department.Status;
-
-            await _context.SaveChangesAsync();
-            return Ok(existing);
+            return Ok(updated);
         }
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department == null)
+            var deleted = await _departmentService.DeleteAsync(id);
+            if (!deleted)
                 return NotFound();
-
-            _context.Departments.Remove(department);
-            await _context.SaveChangesAsync();
             return NoContent();
         }
     }

@@ -14,7 +14,13 @@ using Microsoft.AspNetCore.Identity;
 using BCrypt.Net;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<IExtraHourService, ExtraHourService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExtraHourRequestService, ExtraHourRequestService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
