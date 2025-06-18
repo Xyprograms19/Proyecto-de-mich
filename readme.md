@@ -105,7 +105,7 @@ El frontend estará disponible en `http://localhost:5173`.
 
 - **Login:**  
   `http://localhost:5173/login`
-  Ingresar segun el rol:
+  Ingresar con segun rol:
 
 | Rol      | Usuario               | Contraseña  |
 | -------- | --------------------- | ----------- |
