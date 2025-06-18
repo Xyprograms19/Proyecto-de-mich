@@ -274,11 +274,6 @@ const Overview = () => {
                         >
                           Empleados
                         </th>
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Horas Extras
-                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -300,9 +295,6 @@ const Overview = () => {
                             </td>
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
                               {dept.employees}
-                            </td>
-                            <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {dept.totalExtraHours}
                             </td>
                           </tr>
                         ))
