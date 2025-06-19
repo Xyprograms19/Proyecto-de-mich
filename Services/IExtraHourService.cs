@@ -2,6 +2,8 @@ using ExtraHours.API.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+namespace ExtraHours.API.Services;
+
 public interface IExtraHourService
 {
     Task<IEnumerable<ExtraHour>> GetAllAsync();

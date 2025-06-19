@@ -30,7 +30,7 @@ const UserPage = () => {
   });
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({ reason: "" });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [showRegisterForm, setShowRegisterForm] = useState(false);
 

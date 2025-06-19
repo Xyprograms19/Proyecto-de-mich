@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 
+namespace ExtraHours.API.Services;
+
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
@@ -83,3 +85,90 @@ public class AuthService : IAuthService
         return (tokenString, user);
     }
 }
+
+// using ExtraHours.API.Models;
+// using ExtraHours.API.DTOs;
+// using ExtraHours.API.Repositories;
+// using Microsoft.Extensions.Configuration;
+// using System;
+// using System.Threading.Tasks;
+// using System.IdentityModel.Tokens.Jwt;
+// using Microsoft.IdentityModel.Tokens;
+// using System.Text;
+// using System.Security.Claims;
+
+// namespace ExtraHours.API.Services;
+
+// public class AuthService : IAuthService
+// {
+//     private readonly IUserRepository _userRepository;
+//     private readonly IConfiguration _configuration;
+
+//     public AuthService(IUserRepository userRepository, IConfiguration configuration)
+//     {
+//         _userRepository = userRepository;
+//         _configuration = configuration;
+//     }
+
+//     public async Task<User?> RegisterAsync(RegisterRequest request)
+//     {
+//         if (await _userRepository.ExistsByUsernameOrEmailAsync(request.Username, request.Email))
+//             return null;
+
+//         var user = new User
+//         {
+//             Username = request.Username,
+//             Email = request.Email,
+//             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+//             FirstName = request.FirstName,
+//             LastName = request.LastName,
+//             Department = request.Department,
+//             Position = request.Position,
+//             Role = UserRole.Employee,
+//             IsActive = true
+//         };
+
+//         return await _userRepository.AddAsync(user);
+//     }
+
+//     public async Task<(string token, User? user)> LoginAsync(LoginRequest request, bool isAdmin)
+//     {
+//         var user = await _userRepository.GetByUsernameOrEmailAsync(request.UsernameOrEmail);
+
+//         if (user == null || !user.IsActive)
+//             return (null!, null);
+
+//         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+//             return (null!, null);
+
+//         if (isAdmin && user.Role != UserRole.Admin)
+//             return (null!, null);
+
+//         var token = GenerateJwtToken(user);
+//         return (token, user);
+//     }
+
+//     private string GenerateJwtToken(User user)
+//     {
+//         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+//         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+//         var claims = new[]
+//         {
+//             new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+//             new Claim("role", user.Role.ToString()),
+//             new Claim(JwtRegisteredClaimNames.Email, user.Email),
+//             new Claim("userId", user.Id.ToString())
+//         };
+
+//         var token = new JwtSecurityToken(
+//             issuer: _configuration["Jwt:Issuer"],
+//             audience: _configuration["Jwt:Audience"],
+//             claims: claims,
+//             expires: DateTime.UtcNow.AddHours(8),
+//             signingCredentials: creds
+//         );
+
+//         return new JwtSecurityTokenHandler().WriteToken(token);
+//     }
+// }

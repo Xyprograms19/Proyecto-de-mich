@@ -12,6 +12,8 @@ using Microsoft.Extensions.Configuration;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using BCrypt.Net;
+using ExtraHours.API.Services;
+using ExtraHours.API.Repositories;
 
 
 
@@ -21,12 +23,18 @@ builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IExtraHourRequestService, ExtraHourRequestService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExtraHourRepository, ExtraHourRepository>();
+// builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IExtraHourService, ExtraHourService>();
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IExtraHourRequestRepository, ExtraHourRequestRepository>();
 
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySQL(connectionString));
-
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddCors(options =>
 {

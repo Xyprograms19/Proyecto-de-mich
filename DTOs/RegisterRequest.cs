@@ -24,5 +24,10 @@ namespace ExtraHours.API.DTOs
         [StringLength(100)]
         public string LastName { get; set; } = string.Empty;
 
+        [StringLength(100)]
+        public string Department { get; set; } = "General";
+
+        [StringLength(100)]
+        public string Position { get; set; } = "N/A";
     }
 }
