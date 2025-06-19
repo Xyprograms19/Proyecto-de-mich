@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9FP944TrMkU=",
+  "dgSpecHash": "W3/JXeF+Nvw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\ExtraHours.API.csproj",
+  "projectFilePath": "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\ExtraHours.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mcver\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\mcver\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
