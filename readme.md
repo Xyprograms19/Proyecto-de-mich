@@ -91,9 +91,9 @@ Puedes usarlos para probar el login y los endpoints protegidos.
 
 ---
 
-## Frontend (opcional)
+## Frontend
 
-Si quieres usar el frontend incluido:
+Correr el fronted:
 
 ```bash
 cd fronted
