@@ -25,8 +25,8 @@ namespace ExtraHours.API.Models
         public DateTime EndTime { get; set; }
 
 
-        [Required]
-        public int ExtraHourTypeId { get; set; }
+        // [Required]
+        // public int ExtraHourTypeId { get; set; }
 
 
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ExtraHours.API.DTOs;
 using ExtraHours.API.Models;
 using System.Threading.Tasks;
+using ExtraHours.API.Services;
 
 namespace ExtraHours.API.Controllers
 {
@@ -48,3 +49,40 @@ namespace ExtraHours.API.Controllers
         }
     }
 }
+
+// using Microsoft.AspNetCore.Mvc;
+// using ExtraHours.API.Services;
+// using ExtraHours.API.DTOs;
+// using System.Threading.Tasks;
+
+// namespace ExtraHours.API.Controllers;
+
+// [ApiController]
+// [Route("api/[controller]")]
+// public class AuthController : ControllerBase
+// {
+//     private readonly IAuthService _authService;
+
+//     public AuthController(IAuthService authService)
+//     {
+//         _authService = authService;
+//     }
+
+//     [HttpPost("register")]
+//     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+//     {
+//         var user = await _authService.RegisterAsync(request);
+//         if (user == null)
+//             return BadRequest("El usuario ya existe.");
+//         return Ok(user);
+//     }
+
+//     [HttpPost("login")]
+//     public async Task<IActionResult> Login([FromBody] LoginRequest request)
+//     {
+//         var (token, user) = await _authService.LoginAsync(request, false);
+//         if (user == null)
+//             return Unauthorized("Credenciales inválidas.");
+//         return Ok(new { token, user });
+//     }
+// }
