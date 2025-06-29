@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\ExtraHours.API.csproj": {}
+    "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\ExtraHours.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\ExtraHours.API.csproj": {
+    "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\ExtraHours.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\ExtraHours.API.csproj",
+        "projectUniqueName": "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\ExtraHours.API.csproj",
         "projectName": "ExtraHours.API",
-        "projectPath": "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\ExtraHours.API.csproj",
+        "projectPath": "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\ExtraHours.API.csproj",
         "packagesPath": "C:\\Users\\mcver\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mcver\\Downloads\\Backend_p\\ExtraHours.API\\obj\\",
+        "outputPath": "C:\\Users\\mcver\\Downloads\\ProyectoA\\backendgrupo4\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
