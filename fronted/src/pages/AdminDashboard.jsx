@@ -73,13 +73,6 @@ const AdminDashboard = () => {
       <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center sm:space-x-6 w-full sm:w-auto">
           <div className="relative mb-4 sm:mb-0">
-            <a href="/profile">
-              {/* <img
-                src={user.profilePicture || user.avatar}
-                alt={user.name}
-                className="w-16 h-16 rounded-full border-4 border-blue-500 object-cover"
-              /> */}
-            </a>
             <div className="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
           </div>
 
@@ -100,6 +93,18 @@ const AdminDashboard = () => {
                 <span className="text-sm">{user.department}</span>
               </div>
             </div>
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              onClick={() => {
+                if (user.role === "Admin") {
+                  navigate("/admin-profile");
+                } else {
+                  navigate("/user-profile");
+                }
+              }}
+            >
+              Ver perfil
+            </button>
           </div>
         </div>
       </div>

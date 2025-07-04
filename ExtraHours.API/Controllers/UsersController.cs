@@ -7,6 +7,8 @@ namespace ExtraHours.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    
+
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;

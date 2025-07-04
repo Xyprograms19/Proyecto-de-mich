@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import authService from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const UserPage = () => {
   const { isLightTheme } = useTheme();
@@ -30,12 +31,12 @@ const UserPage = () => {
   });
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({ reason: "" });
-  // const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const [showRegisterForm, setShowRegisterForm] = useState(false);
 
   const currentUser = authService.getCurrentUser();
   const currentUserId = currentUser?.userId;
+
+  const navigate = useNavigate();
 
   const mockCurrentUserDetails = {
     userId: "user123",
@@ -44,7 +45,6 @@ const UserPage = () => {
     role: "Empleado",
     department: "Desarrollo",
     position: "Desarrollador",
-    profilePicture: "https://via.placeholder.com/100/3B82F6/FFFFFF?text=JP",
   };
 
   const colors = {
@@ -338,17 +338,8 @@ const UserPage = () => {
       style={{ backgroundColor: currentTheme.background }}
     >
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Encabezado y botón Registrar Horas */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex-shrink-0">
-              <img
-                src={mockCurrentUserDetails.profilePicture}
-                alt="Foto de Perfil"
-                className="w-16 h-16 rounded-full object-cover border-4"
-                style={{ borderColor: currentTheme.primary }}
-              />
-            </div>
             <div>
               <h1
                 className="text-3xl font-bold"
@@ -368,21 +359,27 @@ const UserPage = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => setShowRegisterForm(true)}
-            className="flex items-center px-4 py-2 rounded-md font-semibold shadow-md transition-all duration-300 hover:scale-105"
-            style={{
-              backgroundColor: currentTheme.buttonPrimaryBg,
-              color: currentTheme.buttonPrimaryText,
-            }}
-          >
-            <PlusCircle size={20} className="mr-2" /> Registrar Horas
-          </button>
+          <div className="flex items-center space-x-4">
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              onClick={() => navigate("/user-profile")}
+            >
+              Ver perfil
+            </button>
+            <button
+              onClick={() => setShowRegisterForm(true)}
+              className="flex items-center px-4 py-2 rounded-md font-semibold shadow-md transition-all duration-300 hover:scale-105"
+              style={{
+                backgroundColor: currentTheme.buttonPrimaryBg,
+                color: currentTheme.buttonPrimaryText,
+              }}
+            >
+              <PlusCircle size={20} className="mr-2" /> Registrar Horas
+            </button>
+          </div>
         </div>
 
-        {/* Sección de Tarjetas de Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          {/* Tarjeta de Total Horas */}
           <div
             className="p-4 rounded-xl border shadow-sm flex items-center space-x-4"
             style={{
@@ -412,7 +409,6 @@ const UserPage = () => {
             </div>
           </div>
 
-          {/* Tarjeta de Horas Aprobadas */}
           <div
             className="p-4 rounded-xl border shadow-sm flex items-center space-x-4"
             style={{
@@ -442,7 +438,6 @@ const UserPage = () => {
             </div>
           </div>
 
-          {/* Tarjeta de Horas Pendientes */}
           <div
             className="p-4 rounded-xl border shadow-sm flex items-center space-x-4"
             style={{
@@ -475,7 +470,6 @@ const UserPage = () => {
 
         {currentUserId ? (
           <>
-            {/* Sección Añadir Nueva Hora Extra - Renderizado Condicional */}
             {showRegisterForm && (
               <div
                 className="p-4 sm:p-6 rounded-xl border shadow-lg transition-colors duration-200 mt-6"
@@ -613,7 +607,6 @@ const UserPage = () => {
               </div>
             )}
 
-            {/* Tabla de horas extras */}
             <h3
               className="text-xl sm:text-2xl font-bold mb-4 mt-8"
               style={{ color: currentTheme.primary }}

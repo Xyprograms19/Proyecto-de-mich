@@ -7,6 +7,7 @@ namespace ExtraHours.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+
     public class DepartmentsController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
