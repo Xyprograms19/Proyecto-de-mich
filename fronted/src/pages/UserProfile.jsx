@@ -9,43 +9,71 @@ import {
   Sun,
   Moon,
   ChevronLeft,
-  Upload,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
 
 const UserProfile = () => {
   const { isLightTheme, toggleTheme } = useTheme();
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("userData");
-    return savedUser
-      ? JSON.parse(savedUser)
-      : {
-          name: "Juan Pérez",
-          email: "juan.perez@company.com",
-          role: "Desarrollador",
-          department: "Desarrollo",
-          isActive: true,
-          profilePicture: null,
-        };
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState({
+    firstName: "Cargando",
+    lastName: "",
+    email: "",
+    role: "",
+    department: "",
+    position: "",
+    isActive: true,
   });
 
   useEffect(() => {
-    localStorage.setItem("userData", JSON.stringify(user));
-  }, [user]);
-
-  const handleProfilePictureChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUser((prev) => ({
-          ...prev,
-          profilePicture: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser) {
+      navigate("/login");
+      return;
     }
-  };
+
+    const userIdToFetch = currentUser.userId;
+
+    if (!userIdToFetch) {
+      console.error(
+        "UserProfile: No se pudo obtener el userId del usuario actual."
+      );
+      navigate("/login");
+      return;
+    }
+
+    const fetchUserProfile = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5023/api/users/${userIdToFetch}`,
+          {
+            headers: {
+              Authorization: `Bearer ${currentUser.token}`,
+            },
+          }
+        );
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.message || `Error al obtener el perfil: ${res.status}`
+          );
+        }
+        const data = await res.json();
+        setUser((prevUser) => ({
+          ...prevUser,
+          ...data,
+        }));
+      } catch (err) {
+        console.error("Error al cargar el perfil del usuario:", err);
+        navigate("/login");
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
 
   const colors = {
     light: {
@@ -72,6 +100,14 @@ const UserProfile = () => {
 
   const currentTheme = isLightTheme ? colors.light : colors.dark;
 
+  if (user.firstName === "Cargando" && !user.email) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p style={{ color: currentTheme.text }}>Cargando perfil...</p>
+      </div>
+    );
+  }
+
   return (
     <div
       className="flex flex-col min-h-screen w-full"
@@ -90,16 +126,15 @@ const UserProfile = () => {
             className="relative py-12 px-8 flex flex-col items-center"
             style={{ backgroundColor: currentTheme.primary, color: "white" }}
           >
-            {/* Back Button */}
+            {/* Botón de Atrás */}
             <a
-              href="/user-page"
+              href="/extrahours-list"
               className="absolute top-4 left-4 p-2 rounded-full hover:bg-white/20 transition-colors flex items-center justify-center"
-              aria-label="Volver a UserPage"
+              aria-label="Volver a la página de usuario"
             >
               <ChevronLeft size={24} />
             </a>
 
-            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors"
@@ -107,48 +142,16 @@ const UserProfile = () => {
               {isLightTheme ? <Moon size={24} /> : <Sun size={24} />}
             </button>
 
-            {/* Profile Picture & Upload Interface */}
-            <div className="relative">
-              <div
-                className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg mb-4 overflow-hidden"
-                style={{ backgroundColor: currentTheme.iconBackground }}
-              >
-                {user.profilePicture ? (
-                  <img
-                    src={user.profilePicture}
-                    alt="Foto de perfil"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User
-                    size={64}
-                    color={currentTheme.primary}
-                    strokeWidth={1.5}
-                  />
-                )}
-              </div>
-
-              {/* Profile picture upload button */}
-              <label
-                htmlFor="profile-picture-upload"
-                className="absolute bottom-4 right-0 bg-white rounded-full p-2 shadow-md cursor-pointer hover:bg-gray-100 transition-colors border"
-                style={{
-                  borderColor: currentTheme.border,
-                  backgroundColor: currentTheme.cardBackground,
-                }}
-              >
-                <Upload size={16} color={currentTheme.primary} />
-                <input
-                  type="file"
-                  id="profile-picture-upload"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleProfilePictureChange}
-                />
-              </label>
+            <div
+              className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg mb-4 overflow-hidden"
+              style={{ backgroundColor: currentTheme.iconBackground }}
+            >
+              <User size={64} color={currentTheme.primary} strokeWidth={1.5} />
             </div>
 
-            <h1 className="text-3xl font-bold">{user.name}</h1>
+            <h1 className="text-3xl font-bold">
+              {user.firstName} {user.lastName}
+            </h1>
             <p className="text-lg opacity-80">{user.role}</p>
             <div className="flex items-center mt-2 space-x-2">
               <Mail className="w-5 h-5" />
@@ -156,9 +159,7 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Content Sections */}
           <div className="p-8">
-            {/* Professional Details */}
             <div
               className="w-full rounded-2xl p-6 space-y-4 border mb-6"
               style={{ borderColor: currentTheme.border }}
@@ -173,6 +174,9 @@ const UserProfile = () => {
                 <div className="flex items-center">
                   <Briefcase className="mr-3" color={currentTheme.primary} />
                   <span>Departamento: {user.department}</span>
+                </div>
+                <div>
+                  <span>Posición: {user.position}</span>
                 </div>
                 <div>
                   <span>
@@ -193,58 +197,6 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {/* Performance Overview */}
-            <div
-              className="w-full rounded-2xl p-6 space-y-4 border mb-6"
-              style={{ borderColor: currentTheme.border }}
-            >
-              <h2
-                className="text-xl font-semibold flex items-center mb-4"
-                style={{ color: currentTheme.primary }}
-              >
-                <Award className="mr-3" /> Rendimiento
-              </h2>
-              <div className="space-y-4">
-                {[
-                  { label: "Horas extra", value: "20 este mes", icon: Clock },
-                  {
-                    label: "Aprobación de horas extra",
-                    value: "95%",
-                    icon: Award,
-                  },
-                  { label: "Última revisión", value: "Excelente", icon: User },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between p-4 rounded-xl border"
-                    style={{ borderColor: currentTheme.border }}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <item.icon
-                        className="w-6 h-6"
-                        color={currentTheme.primary}
-                      />
-                      <div>
-                        <h3
-                          className="text-sm"
-                          style={{ color: currentTheme.subtleText }}
-                        >
-                          {item.label}
-                        </h3>
-                        <p
-                          className="text-lg font-bold"
-                          style={{ color: currentTheme.accent }}
-                        >
-                          {item.value}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Account Settings */}
             <div
               className="w-full rounded-2xl p-6 space-y-4 border"
               style={{ borderColor: currentTheme.border }}
