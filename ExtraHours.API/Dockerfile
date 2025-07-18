@@ -1,28 +1,28 @@
-# Etapa 1: Build
+# Etapa 1: build
 FROM mcr.microsoft.com/dotnet/sdk:9.0-preview AS build
 WORKDIR /app
 
-# Copiar solo el archivo .csproj (ya estamos dentro de ExtraHours.API)
-COPY ./ExtraHours.API.csproj ./
+# Copiar archivos del proyecto
+COPY ExtraHours.API.csproj ./
 
 # Restaurar dependencias
-RUN dotnet restore 
+RUN dotnet restore
 
-# Copiar el resto de archivos del proyecto
-COPY . . 
+# Copiar todo el código (debe incluir Program.cs, etc.)
+COPY . .
 
-# Publicar la aplicación
+# Publicar la app en modo Release
 RUN dotnet publish -c Release -o /app/publish
 
-# Etapa 2: Runtime
+# Etapa 2: runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview AS runtime
 WORKDIR /app
 
-# Copiar lo publicado desde el build
+# Copiar la app publicada
 COPY --from=build /app/publish .
 
-# Exponer el puerto (ajústalo si usas otro)
+# Exponer el puerto (ajusta si usas otro)
 EXPOSE 5023
 
-# Ejecutar la aplicación
+# Ejecutar la app
 ENTRYPOINT ["dotnet", "ExtraHours.API.dll"]
