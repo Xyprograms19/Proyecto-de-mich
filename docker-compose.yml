@@ -1,0 +1,53 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: extrahours-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: extrahoursdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - extrahours-net
+
+  backend:
+    build:
+      context: ./ExtraHours.API
+    container_name: extrahours-backend-container
+    ports:
+      - "5023:5023"
+    depends_on:
+      - mysql
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=server=mysql;port=3306;database=extrahoursdb;user=user;password=user123;
+      - Jwt__Key=12345678901234567890123456789012
+      - Jwt__Issuer=http://backend:5023
+      - Jwt__Audience=http://frontend:80
+    command: ./wait-for-it.sh mysql:3306 --timeout=30 --strict -- dotnet ExtraHours.API.dll
+    networks:
+      - extrahours-net
+
+  frontend:
+    build:
+      context: ./fronted
+    container_name: extrahours-frontend
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_BASE_URL=http://backend:5023/api
+    depends_on:
+      - backend
+    networks:
+      - extrahours-net
+
+volumes:
+  mysql_data:
+
+networks:
+  extrahours-net:

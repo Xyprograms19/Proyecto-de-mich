@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+import axios from '../services/axios';
 import authService from './authService'; 
 
 

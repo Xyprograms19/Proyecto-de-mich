@@ -21,7 +21,7 @@ namespace ExtraHours.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ExtraHourRequest>> CreateExtraHourRequest(ExtraHourRequestCreateDto requestDto)
+        public async Task<ActionResult<ExtraHourRequest>> CreateExtraHourRequest([FromBody] ExtraHourRequestCreateDto requestDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int parsedUserId))
@@ -49,6 +49,14 @@ namespace ExtraHours.API.Controllers
         {
             var requests = await _service.GetAllAsync();
             return Ok(requests);
+        }
+
+        // ✅ NUEVO ENDPOINT: recientes
+        [HttpGet("recent")]
+        public async Task<ActionResult<IEnumerable<ExtraHourRequest>>> GetRecentRequests([FromQuery] int count = 5)
+        {
+            var recentRequests = await _service.GetRecentAsync(count);
+            return Ok(recentRequests);
         }
     }
 }

@@ -78,7 +78,6 @@ public class ExtraHourRequestService : IExtraHourRequestService
             DateOfExtraHours = requestDto.DateOfExtraHours,
             StartTime = requestDto.StartTime,
             EndTime = requestDto.EndTime,
-            // ExtraHourTypeId = requestDto.ExtraHourTypeId,
             Reason = requestDto.Reason,
             Status = "Pendiente",
             RequestDate = DateTime.UtcNow,
@@ -93,4 +92,8 @@ public class ExtraHourRequestService : IExtraHourRequestService
 
     public Task<IEnumerable<ExtraHourRequest>> GetAllAsync()
         => _repository.GetAllAsync();
+
+    // ✅ NUEVO MÉTODO
+    public Task<IEnumerable<ExtraHourRequest>> GetRecentAsync(int count)
+        => _repository.GetRecentAsync(count);
 }

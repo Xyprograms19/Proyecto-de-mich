@@ -9,4 +9,9 @@ public interface IExtraHourRequestRepository
     Task<ExtraHourRequest> CreateAsync(ExtraHourRequest request);
     Task<ExtraHourRequest?> GetByIdAsync(int id);
     Task<IEnumerable<ExtraHourRequest>> GetAllAsync();
+    Task<IEnumerable<ExtraHourRequest>> GetRecentAsync(int count);
+   
 }
+
+
+

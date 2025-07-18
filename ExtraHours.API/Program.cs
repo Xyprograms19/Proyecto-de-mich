@@ -15,60 +15,59 @@ using BCrypt.Net;
 using ExtraHours.API.Services;
 using ExtraHours.API.Repositories;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Servicios
 builder.Services.AddScoped<IExtraHourService, ExtraHourService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IExtraHourRequestService, ExtraHourRequestService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IExtraHourRepository, ExtraHourRepository>();
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IExtraHourService, ExtraHourService>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IExtraHourRequestRepository, ExtraHourRequestRepository>();
 
-
+// Conexión a base de datos
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+// CORS - 🚨 Aquí se corrige la URL del frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:5173")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials());
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173") // ⚠️ ESTE es el puerto correcto para React
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
 });
 
-
+// Controladores
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-
     });
 
 builder.Services.AddEndpointsApiExplorer();
 
-
+// Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "ExtraHours API", Version = "v1" });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "",
+        Description = "Token JWT en formato Bearer",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -88,7 +87,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
+// Autenticación y autorización
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -104,43 +103,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
 builder.Services.AddAuthorization(options =>
 {
-
     options.AddPolicy("AdminOnly", policy => policy.RequireRole(UserRole.Admin.ToString()));
-
     options.AddPolicy("ManagerOrAdmin", policy => policy.RequireRole(UserRole.Manager.ToString(), UserRole.Admin.ToString()));
 });
 
-
 var app = builder.Build();
 
-
+// Semilla de datos
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var passwordHasher = new PasswordHasher<User>();
 
+    // Aplica migraciones automáticamente si no están aplicadas
+    context.Database.Migrate();
+
+    // Semilla de datos
     if (!context.Departments.Any(d => d.Name == "Administración"))
     {
-        context.Departments.Add(new Department
-        {
-            Name = "Administración",
-            Employees = 0,
-            Status = "Activo"
-        });
+        context.Departments.Add(new Department { Name = "Administración", Employees = 0, Status = "Activo" });
     }
     if (!context.Departments.Any(d => d.Name == "Ventas"))
     {
-        context.Departments.Add(new Department
-        {
-            Name = "Ventas",
-            Employees = 0,
-            Status = "Activo"
-        });
+        context.Departments.Add(new Department { Name = "Ventas", Employees = 0, Status = "Activo" });
     }
-
 
     if (!context.Users.Any(u => u.Email == "admin@ejemplo.com"))
     {
@@ -155,11 +142,12 @@ using (var scope = app.Services.CreateScope())
             Position = "Administrador General",
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123")
         };
-        usuarioBase.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123");
         context.Users.Add(usuarioBase);
     }
+
     if (!context.Users.Any(u => u.Email == "empleado1@ejemplo.com"))
     {
         var empleado = new User
@@ -173,33 +161,29 @@ using (var scope = app.Services.CreateScope())
             Position = "Vendedora",
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("empleado123")
         };
-        empleado.PasswordHash = BCrypt.Net.BCrypt.HashPassword("empleado123");
         context.Users.Add(empleado);
     }
 
     context.SaveChanges();
 }
 
-
-if (app.Environment.IsDevelopment())
+// Middleware
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "ExtraHours API v1");
-        options.RoutePrefix = string.Empty;
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "ExtraHours API v1");
+    options.RoutePrefix = string.Empty;
+});
 
 app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigin");
 
-// app.UseAuthentication(); //habilitar la autenticación
-// app.UseAuthorization();  //habilitar la autenticación y autorización
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
-
 app.Run();

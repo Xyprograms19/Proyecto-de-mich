@@ -2,37 +2,49 @@ using ExtraHours.API.Data;
 using ExtraHours.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace ExtraHours.API.Repositories;
-
-public class ExtraHourRequestRepository : IExtraHourRequestRepository
+namespace ExtraHours.API.Repositories
 {
-    private readonly AppDbContext _context;
-
-    public ExtraHourRequestRepository(AppDbContext context)
+    public class ExtraHourRequestRepository : IExtraHourRequestRepository
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context;
 
-    public async Task<ExtraHourRequest> CreateAsync(ExtraHourRequest request)
-    {
-        _context.ExtraHourRequests.Add(request);
-        await _context.SaveChangesAsync();
-        return request;
-    }
+        public ExtraHourRequestRepository(AppDbContext context)
+        {
+            _context = context;
+        }
 
-    public async Task<ExtraHourRequest?> GetByIdAsync(int id)
-    {
-        return await _context.ExtraHourRequests
-            .Include(r => r.User)
-            .FirstOrDefaultAsync(r => r.Id == id);
-    }
+        public async Task<ExtraHourRequest> CreateAsync(ExtraHourRequest request)
+        {
+            _context.ExtraHourRequests.Add(request);
+            await _context.SaveChangesAsync();
+            return request;
+        }
 
-    public async Task<IEnumerable<ExtraHourRequest>> GetAllAsync()
-    {
-        return await _context.ExtraHourRequests
-            .Include(r => r.User)
-            .ToListAsync();
+        public async Task<ExtraHourRequest?> GetByIdAsync(int id)
+        {
+            return await _context.ExtraHourRequests
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<IEnumerable<ExtraHourRequest>> GetAllAsync()
+        {
+            return await _context.ExtraHourRequests
+                .Include(r => r.User)
+                .ToListAsync();
+        }
+
+        // ✅ Nuevo método corregido
+        public async Task<IEnumerable<ExtraHourRequest>> GetRecentAsync(int count)
+        {
+            return await _context.ExtraHourRequests
+                .Include(r => r.User)
+                .OrderByDescending(r => r.RequestDate) 
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

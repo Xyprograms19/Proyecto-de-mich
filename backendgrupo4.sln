@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtraHours.API", "ExtraHours.API\ExtraHours.API.csproj", "{5F30CE25-8484-C54B-2CE4-193A35382B01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtraHours.Tests", "ExtraHours.Tests\ExtraHours.Tests.csproj", "{65E1347E-06FF-BFA9-0561-4B2308754E2F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5F30CE25-8484-C54B-2CE4-193A35382B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F30CE25-8484-C54B-2CE4-193A35382B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F30CE25-8484-C54B-2CE4-193A35382B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F30CE25-8484-C54B-2CE4-193A35382B01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65E1347E-06FF-BFA9-0561-4B2308754E2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65E1347E-06FF-BFA9-0561-4B2308754E2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65E1347E-06FF-BFA9-0561-4B2308754E2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65E1347E-06FF-BFA9-0561-4B2308754E2F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41C1693F-FF9E-4B5D-B2BC-2B26FCD72796}
+	EndGlobalSection
+EndGlobal

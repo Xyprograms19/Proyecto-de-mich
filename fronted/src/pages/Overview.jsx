@@ -41,7 +41,6 @@ const Overview = () => {
     fetchData();
   }, []);
 
-  // Estadísticas
   const totalUsers = users.length;
   const activeUsersCount = users.filter((u) => u.isActive).length;
   const pendingExtraHoursCount = recentRequests.filter(
@@ -67,10 +66,7 @@ const Overview = () => {
   return (
     <div className="space-y-4 p-4 sm:p-6">
       {error && (
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-          role="alert"
-        >
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
           <strong className="font-bold">¡Error!</strong>
           <span className="block sm:inline"> {error}</span>
           <button
@@ -96,6 +92,7 @@ const Overview = () => {
         </div>
       ) : (
         <>
+          {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
             <Card className={cardBg}>
               <CardHeader className="pb-2">
@@ -112,6 +109,7 @@ const Overview = () => {
                 </p>
               </CardContent>
             </Card>
+
             <Card className={cardBg}>
               <CardHeader className="pb-2">
                 <CardTitle className={`text-sm font-medium ${subtextColor}`}>
@@ -122,9 +120,9 @@ const Overview = () => {
                 <div className={`text-2xl font-bold ${textColor}`}>
                   {pendingExtraHoursCount}
                 </div>
-                <p className="text-xs text-yellow-500 flex items-center mt-1"></p>
               </CardContent>
             </Card>
+
             <Card className={cardBg}>
               <CardHeader className="pb-2">
                 <CardTitle className={`text-sm font-medium ${subtextColor}`}>
@@ -158,7 +156,7 @@ const Overview = () => {
               </CardHeader>
               <CardContent>
                 <div className={`text-2xl font-bold ${textColor}`}>
-                  {departments.filter((dep) => dep.status === "Activo").length}
+                  {departments.filter((d) => d.status === "Activo").length}
                 </div>
                 <p className="text-xs text-gray-500 flex items-center mt-1">
                   <span>{departments.length} departamentos en total</span>
@@ -167,7 +165,9 @@ const Overview = () => {
             </Card>
           </div>
 
+          {/* Tables */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Tabla solicitudes recientes */}
             <Card className={cardBg}>
               <CardHeader>
                 <CardTitle className={textColor}>
@@ -182,53 +182,34 @@ const Overview = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Usuario
-                        </th>
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Fecha
-                        </th>
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Tipo
-                        </th>
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Estado
-                        </th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Usuario</th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Fecha</th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Tipo</th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Estado</th>
                       </tr>
                     </thead>
                     <tbody>
                       {recentRequests.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan="4"
-                            className="text-center py-4 text-sm"
-                            style={{ color: subtextColor }}
-                          >
+                          <td colSpan="4" className="text-center py-4 text-sm text-gray-400">
                             No hay solicitudes recientes.
                           </td>
                         </tr>
                       ) : (
                         recentRequests.map((request) => (
-                          <tr
-                            key={request.id}
-                            className="border-b hover:bg-gray-50"
-                          >
+                          <tr key={request.id} className="border-b hover:bg-gray-50">
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.userName || request.user || ""}
+                              {request.userName || request.user || "Desconocido"}
                             </td>
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.date || request.dateOfExtraHours || ""}
+                              {request.date
+                                ? new Date(request.date).toLocaleDateString()
+                                : request.dateOfExtraHours
+                                ? new Date(request.dateOfExtraHours).toLocaleDateString()
+                                : "Sin fecha"}
                             </td>
                             <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {request.type || request.extraHourType || ""}
+                              {request.type || request.extraHourType || "No especificado"}
                             </td>
                             <td className="py-2 px-1 text-sm">
                               <span
@@ -252,6 +233,7 @@ const Overview = () => {
               </CardContent>
             </Card>
 
+            {/* Tabla departamentos */}
             <Card className={cardBg}>
               <CardHeader>
                 <CardTitle className={textColor}>Departamentos</CardTitle>
@@ -264,38 +246,22 @@ const Overview = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Departamento
-                        </th>
-                        <th
-                          className={`text-left py-2 px-1 font-medium ${subtextColor}`}
-                        >
-                          Empleados
-                        </th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Departamento</th>
+                        <th className={`text-left py-2 px-1 font-medium ${subtextColor}`}>Empleados</th>
                       </tr>
                     </thead>
                     <tbody>
                       {departmentStats.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan="3"
-                            className="text-center py-4 text-sm"
-                            style={{ color: subtextColor }}
-                          >
+                          <td colSpan="2" className="text-center py-4 text-sm text-gray-400">
                             No hay estadísticas de departamentos.
                           </td>
                         </tr>
                       ) : (
                         departmentStats.map((dept, index) => (
                           <tr key={index} className="border-b hover:bg-gray-50">
-                            <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {dept.department}
-                            </td>
-                            <td className={`py-2 px-1 text-sm ${textColor}`}>
-                              {dept.employees}
-                            </td>
+                            <td className={`py-2 px-1 text-sm ${textColor}`}>{dept.department}</td>
+                            <td className={`py-2 px-1 text-sm ${textColor}`}>{dept.employees}</td>
                           </tr>
                         ))
                       )}

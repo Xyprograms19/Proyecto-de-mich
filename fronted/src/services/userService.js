@@ -1,5 +1,5 @@
 
-import axios from 'axios';
+import axios from '../services/axios';
 import authService from './authService'; 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5023/api';

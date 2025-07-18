@@ -9,8 +9,8 @@ import {
 import UserProfile from "./pages/UserProfile";
 import Login from "./pages/Login";
 import { ThemeProvider } from "./context/ThemeContext";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProfile from "./pages/AdminProfile";
+import AdminDashboard from "../src/pages/AdminDashboard";
+import AdminProfile from "../src/pages/AdminProfile";
 import Password from "./pages/Password";
 import UserPage from "./pages/UserPage";
 

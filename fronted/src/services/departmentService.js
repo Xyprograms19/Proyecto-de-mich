@@ -1,5 +1,5 @@
 
-import axios from "axios";
+import axios from "../services/axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5023/api';
 const API_URL = `${API_BASE_URL}/departments`;

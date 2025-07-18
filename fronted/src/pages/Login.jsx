@@ -30,48 +30,51 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
-    setErrorMessage("");
-    try {
-      const userData = await authService.login(
-        data.email,
-        data.password,
-        rememberMe
-      );
+  setErrorMessage("");
+  try {
+    const userData = await authService.login(
+      data.email,
+      data.password,
+      rememberMe
+    );
 
-      if (userData) {
-        const userRole = userData.role;
+    if (userData && userData.token) {
+      // 🔐 Guardar token JWT en localStorage
+      localStorage.setItem("token", userData.token);
 
-        console.log("Login exitoso. Rol:", userRole);
+      const userRole = userData.role;
+      console.log("Login exitoso. Rol:", userRole);
 
-        if (userRole === "Admin") {
-          navigate("/admin-dashboard");
-        } else if (userRole === "Employee" || userRole === "Manager") {
-          navigate("/extrahours-list");
-        } else {
-          navigate("/extrahours-list");
-        }
+      if (userRole === "Admin") {
+        navigate("/admin-dashboard");
+      } else if (userRole === "Employee" || userRole === "Manager") {
+        navigate("/extrahours-list");
       } else {
-        setErrorMessage("Credenciales inválidas.");
+        navigate("/extrahours-list");
       }
-    } catch (error) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          setErrorMessage("Correo o contraseña incorrectos.");
-        } else if (error.response.data && error.response.data.message) {
-          setErrorMessage(error.response.data.message);
-        } else {
-          setErrorMessage("Error en el servidor. Inténtalo de nuevo.");
-        }
-      } else if (error.request) {
-        setErrorMessage(
-          "No se pudo conectar con el servidor. Verifica tu conexión."
-        );
-      } else {
-        setErrorMessage("Ocurrió un error inesperado.");
-      }
-      console.error("Login fallido:", error);
+    } else {
+      setErrorMessage("Credenciales inválidas.");
     }
-  };
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 401) {
+        setErrorMessage("Correo o contraseña incorrectos.");
+      } else if (error.response.data && error.response.data.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Error en el servidor. Inténtalo de nuevo.");
+      }
+    } else if (error.request) {
+      setErrorMessage(
+        "No se pudo conectar con el servidor. Verifica tu conexión."
+      );
+    } else {
+      setErrorMessage("Ocurrió un error inesperado.");
+    }
+    console.error("Login fallido:", error);
+  }
+};
+
 
   return (
     <div className="flex flex-col md:flex-row h-full min-h-screen w-full font-sans overflow-hidden m-0 p-0">

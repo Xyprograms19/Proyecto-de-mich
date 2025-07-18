@@ -41,9 +41,10 @@
 
 // export default authService;
 
-import axios from 'axios';
+import axios from '../services/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5023/api';
+console.log("API_BASE_URL:", API_BASE_URL);
 
 const authService = {
   login: async (usernameOrEmail, password, rememberMe = false) => {
@@ -53,9 +54,6 @@ const authService = {
         password,
         rememberMe,
       });
-
-
-     
 
       if (response.data.token) {
         localStorage.setItem('user', JSON.stringify(response.data));
@@ -83,4 +81,16 @@ const authService = {
   }
 };
 
+// ✅ Añade esta función afuera del objeto
+const authHeader = () => {
+  const token = authService.getToken();
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  } else {
+    return {};
+  }
+};
+
+export { authHeader };
 export default authService;
+
