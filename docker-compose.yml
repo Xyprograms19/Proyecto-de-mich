@@ -18,7 +18,8 @@ services:
   backend:
     build:
       context: ./ExtraHours.API
-    container_name: extrahours-backend-container
+      dockerfile: Dockerfile
+    container_name: extrahours-backend
     ports:
       - "5023:5023"
     depends_on:
@@ -29,6 +30,7 @@ services:
       - Jwt__Key=12345678901234567890123456789012
       - Jwt__Issuer=http://backend:5023
       - Jwt__Audience=http://frontend:80
+    # Si usas wait-for-it.sh en la raíz de ExtraHours.API
     command: ./wait-for-it.sh mysql:3306 --timeout=30 --strict -- dotnet ExtraHours.API.dll
     networks:
       - extrahours-net
@@ -36,6 +38,7 @@ services:
   frontend:
     build:
       context: ./fronted
+      dockerfile: Dockerfile
     container_name: extrahours-frontend
     ports:
       - "5173:80"
