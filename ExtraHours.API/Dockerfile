@@ -6,7 +6,8 @@ WORKDIR /src
 COPY ExtraHours.API.csproj ./
 
 # Restaurar dependencias
-RUN dotnet restore
+RUN docker compose up --build
+
 
 # Copiar el resto de archivos del proyecto
 COPY . .
