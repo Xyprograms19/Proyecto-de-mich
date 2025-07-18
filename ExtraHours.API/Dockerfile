@@ -1,23 +1,23 @@
 # Etapa 1: build
 FROM mcr.microsoft.com/dotnet/sdk:9.0-preview AS build
-WORKDIR /app
+WORKDIR /src
 
-# Copiar el archivo .csproj y restaurar dependencias
+# Copiar archivo .csproj primero (ajustado al nombre correcto y ruta)
 COPY ExtraHours.API.csproj ./
+
+# Restaurar dependencias
 RUN dotnet restore
 
-# Copiar el resto de archivos
+# Copiar el resto de archivos del proyecto
 COPY . .
 
-# Publicar la aplicación
-RUN dotnet publish -c Release -o /out
+# Publicar la app
+RUN dotnet publish -c Release -o /app/publish
 
 # Etapa 2: runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview AS runtime
 WORKDIR /app
-COPY --from=build /out .
+COPY --from=build /app/publish .
 
-# Puerto que usa la app (mismo que en launchSettings.json o el expuesto en compose)
 EXPOSE 5023
-
 ENTRYPOINT ["dotnet", "ExtraHours.API.dll"]
