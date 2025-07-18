@@ -1,24 +1,25 @@
 # Etapa 1: build
-FROM mcr.microsoft.com/dotnet/sdk:9.0-preview AS build
-WORKDIR /src
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
 
-# Copiar archivo .csproj primero (ajustado al nombre correcto y ruta)
-COPY ExtraHours.API.csproj ./
+# Copia solo el .csproj y restaura dependencias
+COPY ExtraHours.API/*.csproj ./ExtraHours.API/
+RUN dotnet restore ./ExtraHours.API/*.csproj
 
-# Restaurar dependencias
-RUN docker compose up --build
-
-
-# Copiar el resto de archivos del proyecto
+# Copia todo el proyecto y compila
 COPY . .
-
-# Publicar la app
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish ./ExtraHours.API/ExtraHours.API.csproj -c Release -o /out
 
 # Etapa 2: runtime
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-preview AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/publish .
 
-EXPOSE 5023
-ENTRYPOINT ["dotnet", "ExtraHours.API.dll"]
+# Copiar archivos publicados
+COPY --from=build /out .
+
+# Copiar script wait-for-it.sh y darle permisos
+COPY ExtraHours.API/wait-for-it.sh .
+RUN chmod +x wait-for-it.sh
+
+# Usar script para esperar a MySQL antes de ejecutar la app
+ENTRYPOINT ["./wait-for-it.sh", "mysql:3306", "--timeout=90", "--strict", "--", "dotnet", "ExtraHours.API.dll"]

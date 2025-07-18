@@ -27,25 +27,26 @@ builder.Services.AddScoped<IExtraHourRepository, ExtraHourRepository>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IExtraHourRequestRepository, ExtraHourRequestRepository>();
 
-// Conexión a base de datos
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// ✅ Leer conexión desde variable de entorno
+var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+Console.WriteLine("⛓️ Connection string: " + connectionString); // Para debug
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// CORS - 🚨 Aquí se corrige la URL del frontend
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // ⚠️ ESTE es el puerto correcto para React
+            policy.WithOrigins("http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
 
-// Controladores
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -87,7 +88,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Autenticación y autorización
+// Autenticación JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -115,11 +116,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    // Aplica migraciones automáticamente si no están aplicadas
     context.Database.Migrate();
 
-    // Semilla de datos
     if (!context.Departments.Any(d => d.Name == "Administración"))
     {
         context.Departments.Add(new Department { Name = "Administración", Employees = 0, Status = "Activo" });
@@ -179,11 +177,8 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowSpecificOrigin");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.Run();
